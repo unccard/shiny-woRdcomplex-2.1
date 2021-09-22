@@ -1,6 +1,8 @@
 # Shiny App for WCM Script woRdcomplex-2.1
 
 library(shiny)
+library(DT)
+library(stringr)
 
 ui <- fluidPage(
   
@@ -9,31 +11,17 @@ ui <- fluidPage(
   
   # Sidebar panel with inputs 
   sidebarPanel(
-    textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%")
-  ),
-  
-  # Main panel for displaying outputs 
-  mainPanel(
-    fluidRow(
-      column(width = 12),
-    #  box(width = NULL, #height = "200px",
-    #       column(width = 6, align = "center",
-    #              h4("Transcript Averages", style = "text-align:center"),
-    #              tableOutput("average_table")
-    #       ),
-    #       column(width = 6, align = "center",
-    #              h4("Word by Word", style = "text-align:center"),
-    #              tableOutput("results")
-    #       )
-    #   )
-    ),
+    textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%"),
+    DT::dataTableOutput("word_by_word", "auto", "auto")
   )
-  
 )
 
-# Define server logic to plot various variables against mpg ----
 server <- function(input, output) {
-
+  output$word_by_word <- renderDataTable(
+    as.data.frame(strsplit(input$sample, "[ ?\r?\n]")),  # each space or newline creates a new entry in DT 
+    TRUE
+    
+  )
 }
 
 shinyApp(ui, server)
