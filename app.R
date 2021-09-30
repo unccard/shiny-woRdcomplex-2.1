@@ -54,7 +54,8 @@ ui <- fluidPage(
   
   # Sidebar panel with inputs 
   sidebarPanel(
-    textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%")
+    textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%"),
+    actionButton("submit", "Calculate WCM")
   ),
   
   mainPanel(
@@ -64,15 +65,20 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   word_db <- read.csv('/Users/lindsaygreene/Desktop/programming/woRdcomplex-2.1/UNCCombWordDB.csv', na.strings=c("", "NA"))
-  tibbletest <-tibble(word_db$word)
-  wbw_english <- strsplit(input$sample, "[ ?\r?\n]")
+  tibbletest <-tibble(word_db$word, word_db$phon_klattese)
+  
+  output_wbw <- eventReactive(input$submit, {
+    runif(input$sample)
+  })
+  
+  wbw_english <- reactive(strsplit(input$sample, "[ ?\r?\n]"))
   wbw_klattese <- c()
-  for(english in 1:len(wbw_english)) {
+  for(english in 1:length(wbw_english)) {
     for(i in 1:nrow(text_df)) {
       word <- toString(text_df[i,1])
       row <- which(tibbletest[,1] == word)
       if(!identical(toString(tibbletest[row, 2]),"character(0)")){  # omit words not found in word_db
-        wbw_klattese <- append(wbw_klattese, toString(tibbletest[row, 1]))
+        wbw_klattese <- append(wbw_klattese, toString(tibbletest[row, 2]))
       }
     }
   }
