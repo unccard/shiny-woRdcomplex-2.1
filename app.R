@@ -1,6 +1,7 @@
 # Shiny App for WCM Script woRdcomplex-2.1
 
 library(shiny)
+library(tidyr)
 library(DT)
 library(stringr)
 
@@ -63,9 +64,22 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   word_db <- read.csv('/Users/lindsaygreene/Desktop/programming/woRdcomplex-2.1/UNCCombWordDB.csv', na.strings=c("", "NA"))
-  
+  tibbletest <-tibble(word_db$word)
+  wbw_english <- strsplit(input$sample, "[ ?\r?\n]")
+  wbw_klattese <- c()
+  for(english in 1:len(wbw_english)) {
+    for(i in 1:nrow(text_df)) {
+      word <- toString(text_df[i,1])
+      row <- which(tibbletest[,1] == word)
+      if(!identical(toString(tibbletest[row, 2]),"character(0)")){  # omit words not found in word_db
+        wbw_klattese <- append(wbw_klattese, toString(tibbletest[row, 1]))
+      }
+    }
+  }
+  wbw_vectors <- c(wbw_english, wbw_klattese)
   output$word_by_word <- renderDataTable(
-    as.data.frame(strsplit(input$sample, "[ ?\r?\n]")),  # each space or newline creates a new entry in DT 
+    #as.data.frame(strsplit(input$sample, "[ ?\r?\n]")),  # each space or newline creates a new entry in DT 
+    as.data.frame(wbw_vectors),
     TRUE
     
   )
