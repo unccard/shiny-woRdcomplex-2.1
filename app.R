@@ -59,35 +59,82 @@ ui <- fluidPage(
   ),
   
   mainPanel(
-    DT::dataTableOutput("word_by_word", "auto", "auto")
+    DT::dataTableOutput("word_by_word", "auto", "auto"), 
+    DT::dataTableOutput("average", "auto", "auto")
   )
 )
 
 server <- function(input, output) {
   word_db <- read.csv('/Users/lindsaygreene/Desktop/programming/woRdcomplex-2.1/UNCCombWordDB.csv', na.strings=c("", "NA"))
-  tibbletest <-tibble(word_db$word, word_db$phon_klattese)
+  tibbletest <-tibble(word_db$word, word_db$phon_klattese, word_db$SUBTLWF0to10)
+  
+  # set up data frame to store average results  
+  data <- data.frame(matrix(vector(), ncol=4))  # data frame to store avg output  
+  header_names <- list("Total_Words_in_Tscript", "Total_Words_Found_in_DB","Avg_WCM_Score","Avg_WF_Score")  # column headers for avg output df 
+  colnames(data) <- header_names
+  
+  # set up data frame to store word by word results 
+  word_by_word <- data.frame(matrix(vector(), ncol=4))  # data frame to store info ab individual words from each transcript
+  names <- list("English", "Klattese", "WCM_Score", "Word_Frequency")  # column headers for word by word df 
+  colnames(word_by_word) <- names
+  wbw_row = 1  # count number of rows in word by word db 
+  
+  # initialize cumulative points & vectors for each file 
+  phon_total <- wf_total <- 0 
+  wbw_found_in_DB <- wbw_klattese <- wbw_wf <- c()
   
   output_wbw <- eventReactive(input$submit, {
     runif(input$sample)
   })
   
+  # split reactive input on any space or newline 
   wbw_english <- reactive(strsplit(input$sample, "[ ?\r?\n]"))
-  wbw_klattese <- c()
+  
+  # retrieve information from word db 
   for(english in 1:length(wbw_english)) {
-    for(i in 1:nrow(text_df)) {
-      word <- toString(text_df[i,1])
-      row <- which(tibbletest[,1] == word)
-      if(!identical(toString(tibbletest[row, 2]),"character(0)")){  # omit words not found in word_db
-        wbw_klattese <- append(wbw_klattese, toString(tibbletest[row, 2]))
-      }
+    word <- toString(text_df[i,1])
+    row <- which(tibbletest[,1] == word)
+    if(!identical(toString(tibbletest[row, 2]),"character(0)")){  # omit words not found in word_db
+      wbw_found_in_DB <- append(wbw_found_in_DB, toString(tibbletest[row, 1]))
+      wbw_klattese <- append(wbw_klattese, toString(tibbletest[row, 2]))
+      wbw_wf <- append(wbw_wf, toString(tibbletest[row, 3]))
     }
   }
-  wbw_vectors <- c(wbw_english, wbw_klattese)
-  output$word_by_word <- renderDataTable(
-    #as.data.frame(strsplit(input$sample, "[ ?\r?\n]")),  # each space or newline creates a new entry in DT 
-    as.data.frame(wbw_vectors),
-    TRUE
+  
+  # transform vectors into data frames
+  as.data.frame(wbw_found_in_DB)
+  as.data.frame(wbw_klattese)
+  as.data.frame(wbw_wf)
+  
+  # calculate wcm for each word 
+  for(word in 1:length(wbw_found_in_DB)) {
+    klattese <- wbw_klattese[word, 1]
+    phon_points <- calculateWCM(klattese)
     
+    # store results in wbw df 
+    word_by_word[wbw_row, 1] = wbw_found_in_DB[word, 1]
+    word_by_word[wbw_row, 2] = klattese
+    word_by_word[wbw_row, 3] = phon_points
+    word_by_word[wbw_row, 4] = wbw_wf[word, 1]
+    
+    wbw_row = wbw_row + 1  # move to next row in the word by word df 
+    
+    # add data for this word to cumulative total 
+    phon_total = phon_total + phon_points
+    wf_total = wf_total + wbw_wf[word, 1]
+  }
+  
+  data[1,1] = length(wbw_english)
+  data[1,2] = length(wbw_found_in_DB)
+  data[1,3] = phon_total/nrow(wbw_found_in_DB)
+  data[1,4] = wf_total/nrow(wbw_wf)
+  
+  output$word_by_word <- renderDataTable(
+    word_by_word, TRUE
+  )
+  
+  output$average <- renderDataTable (
+    data, TRUE
   )
 }
 
