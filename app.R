@@ -41,57 +41,63 @@ server <- function(input, output) {
   phon_total <- wf_total <- 0 
   wbw_found_in_DB <- wbw_klattese <- wbw_wf <- c()
   
-  req(input$sample)  # ensure at least one entry before we perform calculations 
-  
-  # split reactive input on any space or newline 
-  wbw_english <- reactive(strsplit(input$sample, "[ ?\r?\n]"))
-  
-  # retrieve information from word db 
-  for(english in 1:length(wbw_english)) {
-    word <- toString(text_df[i,1])
-    row <- which(tibbletest[,1] == word)
-    if(!identical(toString(tibbletest[row, 2]),"character(0)")){  # omit words not found in word_db
-      wbw_found_in_DB <- append(wbw_found_in_DB, toString(tibbletest[row, 1]))
-      wbw_klattese <- append(wbw_klattese, toString(tibbletest[row, 2]))
-      wbw_wf <- append(wbw_wf, toString(tibbletest[row, 3]))
+  # ensure at least one entry, then perform calculations 
+  output$word_by_word <- reactive({
+    
+    req(input$sample)  # verify input is not empty 
+    
+    # split reactive input on any space or newline 
+    wbw_english <- strsplit(input$sample, "[ ?\r?\n]")
+    
+    # retrieve information from word db 
+    for(english in 1:length(wbw_english)) {
+      word <- toString(text_df[i,1])
+      row <- which(tibbletest[,1] == word)
+      if(!identical(toString(tibbletest[row, 2]),"character(0)")){  # omit words not found in word_db
+        wbw_found_in_DB <- append(wbw_found_in_DB, toString(tibbletest[row, 1]))
+        wbw_klattese <- append(wbw_klattese, toString(tibbletest[row, 2]))
+        wbw_wf <- append(wbw_wf, toString(tibbletest[row, 3]))
+      }
     }
-  }
-  
-  # transform vectors into data frames
-  as.data.frame(wbw_found_in_DB)
-  as.data.frame(wbw_klattese)
-  as.data.frame(wbw_wf)
-  
-  # calculate wcm for each word 
-  for(word in 1:length(wbw_found_in_DB)) {
-    klattese <- wbw_klattese[word, 1]
-    phon_points <- calculateWCM(klattese)
     
-    # store results in wbw df 
-    word_by_word[wbw_row, 1] = wbw_found_in_DB[word, 1]
-    word_by_word[wbw_row, 2] = klattese
-    word_by_word[wbw_row, 3] = phon_points
-    word_by_word[wbw_row, 4] = wbw_wf[word, 1]
+    # transform vectors into data frames
+    as.data.frame(wbw_found_in_DB)
+    as.data.frame(wbw_klattese)
+    as.data.frame(wbw_wf)
     
-    wbw_row = wbw_row + 1  # move to next row in the word by word df 
+    # calculate wcm for each word 
+    for(word in 1:length(wbw_found_in_DB)) {
+      klattese <- wbw_klattese[word, 1]
+      phon_points <- calculateWCM(klattese)
+      
+      # store results in wbw df 
+      word_by_word[wbw_row, 1] = wbw_found_in_DB[word, 1]
+      word_by_word[wbw_row, 2] = klattese
+      word_by_word[wbw_row, 3] = phon_points
+      word_by_word[wbw_row, 4] = wbw_wf[word, 1]
+      
+      wbw_row = wbw_row + 1  # move to next row in the word by word df 
+      
+      # add data for this word to cumulative total 
+      phon_total = phon_total + phon_points
+      wf_total = wf_total + wbw_wf[word, 1]
+    }
     
-    # add data for this word to cumulative total 
-    phon_total = phon_total + phon_points
-    wf_total = wf_total + wbw_wf[word, 1]
-  }
-  
-  data[1,1] = length(wbw_english)
-  data[1,2] = length(wbw_found_in_DB)
-  data[1,3] = phon_total/nrow(wbw_found_in_DB)
-  data[1,4] = wf_total/nrow(wbw_wf)
-  
-  output$word_by_word <- renderDataTable(
-    word_by_word, TRUE
-  )
-  
-  output$average <- renderDataTable (
-    data, TRUE
-  )
+    output$average <- reactive({
+      data[1,1] = length(wbw_english)
+      data[1,2] = length(wbw_found_in_DB)
+      data[1,3] = phon_total/nrow(wbw_found_in_DB)
+      data[1,4] = wf_total/nrow(wbw_wf)
+    })
+    
+    output$word_by_word <- renderDataTable(
+      word_by_word, TRUE
+    )
+    
+    output$average <- renderDataTable (
+      data, TRUE
+    )
+  })
 }
 
 shinyApp(ui, server)
