@@ -13,8 +13,7 @@ ui <- fluidPage(
   
   # Sidebar panel with inputs 
   sidebarPanel(
-    textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%"),
-    actionButton("submit", "Calculate WCM")
+    textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%")
   ),
   
   mainPanel(
@@ -42,11 +41,7 @@ server <- function(input, output) {
   phon_total <- wf_total <- 0 
   wbw_found_in_DB <- wbw_klattese <- wbw_wf <- c()
   
-  # TODO: how to make submit button work! 
-  # TODO: need runif for both wbw and avg? 
-  output_wbw <- eventReactive(input$submit, {
-    runif(input$sample)
-  })
+  req(input$sample)  # ensure at least one entry before we perform calculations 
   
   # split reactive input on any space or newline 
   wbw_english <- reactive(strsplit(input$sample, "[ ?\r?\n]"))
