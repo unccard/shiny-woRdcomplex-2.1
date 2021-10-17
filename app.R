@@ -7,7 +7,6 @@ library(stringr)
 source("functions.R")
 
 ui <- fluidPage(
-  
   # App title 
   headerPanel("Word Complexity Measure"),
   
@@ -23,8 +22,8 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
-  word_db <- read.csv('/Users/lindsaygreene/Desktop/programming/woRdcomplex-2.1/UNCCombWordDB.csv', na.strings=c("", "NA"))
-  tibbletest <-tibble(word_db$word, word_db$phon_klattese, word_db$SUBTLWF0to10)
+  word_db <- read.csv('UNCWordDB-2021-10-08.csv', na.strings=c("", "NA"))
+  tibbletest <-tibble(word_db$Word, word_db$KlatteseSyll, word_db$Zipf.value)
   
   # set up data frame to store average results  
   data <- data.frame(matrix(vector(), ncol=4))  # data frame to store avg output  
@@ -50,10 +49,10 @@ server <- function(input, output) {
     wbw_english <- strsplit(input$sample, "[ ?\r?\n]")
     
     # retrieve information from word db 
-    for(english in 1:length(wbw_english)) {
-      word <- toString(text_df[i,1])
+    for(i in 1:length(wbw_english)) {
+      word <- wbw_english[[1]][i]
       row <- which(tibbletest[,1] == word)
-      if(!identical(toString(tibbletest[row, 2]),"character(0)")){  # omit words not found in word_db
+      if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
         wbw_found_in_DB <- append(wbw_found_in_DB, toString(tibbletest[row, 1]))
         wbw_klattese <- append(wbw_klattese, toString(tibbletest[row, 2]))
         wbw_wf <- append(wbw_wf, toString(tibbletest[row, 3]))
@@ -70,7 +69,7 @@ server <- function(input, output) {
       klattese <- wbw_klattese[word, 1]
       phon_points <- calculateWCM(klattese)
       
-      # store results in wbw df 
+      # store results in word by word df 
       word_by_word[wbw_row, 1] = wbw_found_in_DB[word, 1]
       word_by_word[wbw_row, 2] = klattese
       word_by_word[wbw_row, 3] = phon_points
