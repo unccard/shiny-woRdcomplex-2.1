@@ -37,7 +37,7 @@ server <- function(input, output) {
   wbw_row = 1  # count number of rows in word by word db 
   
   # initialize cumulative points & vectors for each file 
-  phon_total <- wf_total <- 0 
+  phon_total <- wf_total <- wbw_english_length <- wbw_found_in_db_length <- 0 
   wbw_found_in_DB <- wbw_klattese <- wbw_wf <- c()
   
   # ensure at least one entry, then perform calculations 
@@ -47,9 +47,10 @@ server <- function(input, output) {
     
     # split reactive input on any space or newline 
     wbw_english <- strsplit(input$sample, "[ ?\r?\n]")
+    wbw_english_length = length(wbw_english)
     
     # retrieve information from word db 
-    for(i in 1:length(wbw_english)) {
+    for(i in 1:wbw_english_length) {
       word <- wbw_english[[1]][i]
       row <- which(tibbletest[,1] == word)
       if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
@@ -64,8 +65,10 @@ server <- function(input, output) {
     as.data.frame(wbw_klattese)
     as.data.frame(wbw_wf)
     
+    wbw_found_in_db_length = length(wbw_found_in_DB)
+    
     # calculate wcm for each word 
-    for(word in 1:length(wbw_found_in_DB)) {
+    for(word in 1:wbw_found_in_db_length) {
       klattese <- wbw_klattese[word, 1]
       phon_points <- calculateWCM(klattese)
       
@@ -82,21 +85,25 @@ server <- function(input, output) {
       wf_total = wf_total + wbw_wf[word, 1]
     }
     
-    output$average <- reactive({
-      data[1,1] = length(wbw_english)
-      data[1,2] = length(wbw_found_in_DB)
-      data[1,3] = phon_total/nrow(wbw_found_in_DB)
-      data[1,4] = wf_total/nrow(wbw_wf)
-    })
     
     output$word_by_word <- renderDataTable(
       word_by_word, TRUE
     )
+  })
+  
+  output$average <- reactive({
+    req(input$word_by_word)
+    
+    data[1,1] = wbw_english_length
+    data[1,2] = wbw_found_in_db_length
+    data[1,3] = phon_total/wbw_found_in_db_length
+    data[1,4] = wf_total/wbw_found_in_db_length
     
     output$average <- renderDataTable (
       data, TRUE
     )
   })
+  
 }
 
 shinyApp(ui, server)
