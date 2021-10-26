@@ -47,7 +47,7 @@ server <- function(input, output) {
   observeEvent(input$submit,{
     req(input$sample)  # verify input is not empty
     vals$wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline 
-    retrieveDBInfo(vals)  # add info from database to collection
+    retrieveDBInfo(vals, tibbletest)  # add info from database to collection
     asDataFrame(vals) # transform reactive vectors into data frames 
     updateWordByWord(vals, word_by_word, wbw_row)  # perform wcm calculations and store in word by word df 
     updateAverage(vals, data)  # perform average calculations and store in average df 

@@ -49,8 +49,8 @@ calculateWCM<- function(klattese) {  # calculate WCM score for the word
   return(phon_points) 
 }
 
-retrieveDBInfo <- function(vals) {
-  for(i in 1:vals$length(vals$wbw_english)) {
+retrieveDBInfo <- function(vals, tibbletest) {
+  for(i in 1:length(vals$wbw_english)) {
     word <- vals$wbw_english[[1]][i]
     row <- which(tibbletest[,1] == word)
     if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
