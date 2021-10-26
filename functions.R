@@ -52,7 +52,8 @@ calculateWCM <- function(klattese) {  # calculate WCM score for the word
 retrieveDBInfo <- function(vals, tibbletest) {
   for(i in 1:length(vals$wbw_english)) {
     word <- vals$wbw_english[[1]][i]
-    row <- which(tibbletest[,1] == word)
+    row <- as.integer(which(tibbletest[,1] == word))
+    # if(length(row) == 0)  # if word not found in db, handle error 
     if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
       vals$wbw_found_in_DB <- append(vals$wbw_found_in_DB, toString(tibbletest[row, 1]))
       vals$wbw_klattese <- append(vals$wbw_klattese, toString(tibbletest[row, 2]))
@@ -92,3 +93,4 @@ updateAverage <- function(vals, data) {
   data[1,3] = vals$phon_total/length(vals$wbw_found_in_DB_df)
   data[1,4] = vals$wf_total/length(vals$wbw_found_in_DB_df)
 }
+
