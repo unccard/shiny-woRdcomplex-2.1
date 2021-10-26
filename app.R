@@ -35,6 +35,10 @@ server <- function(input, output) {
   names <- list("English", "Klattese", "WCM_Score", "Word_Frequency")  # column headers for word by word df 
   colnames(word_by_word) <- names
   wbw_row = 1  # count number of rows in word by word db 
+  
+  # initialize cumulative points & vectors for each file 
+  phon_total <- wf_total <- wbw_english_length <- wbw_found_in_db_length <- 0 
+  wbw_found_in_DB <- wbw_klattese <- wbw_wf <- c()
 
   # ensure at least one entry, then perform calculations 
   output$word_by_word <- reactive({
