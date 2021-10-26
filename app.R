@@ -12,10 +12,9 @@ ui <- fluidPage(
   
   # Sidebar panel with inputs 
   sidebarPanel(
-    textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%")
+    textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%"), 
+    actionButton("submit", "Calculate WCM")
   ),
-  
-  actionButton("submit", "Calculate WCM"),
   
   mainPanel(
     DT::dataTableOutput("word_by_word", "auto", "auto"), 
@@ -54,11 +53,13 @@ server <- function(input, output) {
   })
 
   output$word_by_word <- renderDataTable(
-    word_by_word, TRUE
+    word_by_word, caption = "Word by Word",
+    server = TRUE
   )
 
   output$average <- renderDataTable (
-      data, TRUE
+      data, caption = "Average",
+      server = TRUE
   )
 }
 

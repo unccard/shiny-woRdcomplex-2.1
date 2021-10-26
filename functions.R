@@ -1,4 +1,4 @@
-calculateWCM<- function(klattese) {  # calculate WCM score for the word 
+calculateWCM <- function(klattese) {  # calculate WCM score for the word 
   # phoneme categories 
   engl_voiceless_cons <- c("C","f","h","k","p","s","S","t","T")
   engl_voiced_cons <- c("b","d","D","F","g","J","l","M","m","N","n","G","r","v","w","y","z","Z")  # word final M and N? 
