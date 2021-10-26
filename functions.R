@@ -48,3 +48,47 @@ calculateWCM<- function(klattese) {  # calculate WCM score for the word
   
   return(phon_points) 
 }
+
+retrieveDBInfo <- function(vals) {
+  for(i in 1:vals$length(vals$wbw_english)) {
+    word <- vals$wbw_english[[1]][i]
+    row <- which(tibbletest[,1] == word)
+    if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
+      vals$wbw_found_in_DB <- append(vals$wbw_found_in_DB, toString(tibbletest[row, 1]))
+      vals$wbw_klattese <- append(vals$wbw_klattese, toString(tibbletest[row, 2]))
+      vals$wbw_wf <- append(vals$wbw_wf, toString(tibbletest[row, 3]))
+    }
+  }
+}
+
+asDataFrame <- function(vals) {
+  vals$wbw_found_in_DB <- as.data.frame(vals$wbw_found_in_DB)
+  vals$wbw_klattese <- as.data.frame(vals$wbw_klattese)
+  vals$wbw_wf <- as.data.frame(vals$wbw_wf)
+}
+
+updateWordByWord <- function(vals, word_by_word, wbw_row) {
+  for(word in 1:length(vals$wbw_found_in_DB)) {
+    klattese <- vals$wbw_klattese[word,1]
+    phon_points <- calculateWCM(klattese)
+    
+    # store results in word by word df 
+    word_by_word[wbw_row, 1] = vals$wbw_found_in_DB[word, 1]
+    word_by_word[wbw_row, 2] = klattese
+    word_by_word[wbw_row, 3] = phon_points
+    word_by_word[wbw_row, 4] = as.double(vals$wbw_wf[word, 1])
+    
+    wbw_row = wbw_row + 1  # move to next row in the word by word df 
+    
+    # add data for this word to cumulative total 
+    vals$phon_total <- vals$phon_total + phon_points
+    vals$wf_total <- vals$wf_total + as.double(vals$wbw_wf[word, 1])
+  }
+}
+
+updateAverage <- function(vals, data) {
+  data[1,1] = length(vals$wbw_english)
+  data[1,2] = length(vals$wbw_found_in_DB)
+  data[1,3] = vals$phon_total/length(vals$wbw_found_in_DB)
+  data[1,4] = vals$wf_total/length(vals$wbw_found_in_DB)
+}

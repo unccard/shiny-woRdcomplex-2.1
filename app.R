@@ -15,8 +15,9 @@ ui <- fluidPage(
     textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%")
   ),
   
+  actionButton("submit", "Calculate WCM"),
+  
   mainPanel(
-    DT::dataTableOutput("klattese", "auto", "auto"),
     DT::dataTableOutput("word_by_word", "auto", "auto"), 
     DT::dataTableOutput("average", "auto", "auto")
   )
@@ -38,76 +39,27 @@ server <- function(input, output) {
   wbw_row = 1  # count number of rows in word by word db 
   
   # initialize cumulative points & vectors for each file 
-  phon_total <- wf_total <- wbw_english_length <- wbw_found_in_db_length <- 0 
-  wbw_found_in_DB <- wbw_klattese <- wbw_wf <- c()
+  #phon_total <- wf_total <- wbw_english_length <- wbw_found_in_db_length <- 0 
+  #wbw_found_in_DB <- wbw_klattese <- wbw_wf <- c()
+  
+  vals <- reactiveValues()
+  
+  observeEvent(input$submit,{
+    req(input$sample)  # verify input is not empty
+    vals$wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline 
+    retrieveDBInfo(vals)  # add info from database to collection
+    asDataFrame(vals) # transform reactive vectors into data frames 
+    updateWordByWord(vals, word_by_word, wbw_row)  # perform wcm calculations and store in word by word df 
+    updateAverage(vals, data)  # perform average calculations and store in average df 
+  })
 
-  # ensure at least one entry, then perform calculations 
-  output$word_by_word <- reactive({
-    
-    req(input$sample)  # verify input is not empty 
-    
-    # split reactive input on any space or newline 
-    wbw_english <- strsplit(input$sample, "[ ?\r?\n]")
-    wbw_english_length = length(wbw_english)
-    
-    output$klattese <- renderDataTable(
-      as.data.frame(strsplit(input$sample, "[ ?\r?\n]")),  # each space or newline creates a new entry in DT 
-      TRUE)
-    
-    # retrieve information from word db 
-    for(i in 1:wbw_english_length) {
-      word <- wbw_english[[1]][i]
-      row <- which(tibbletest[,1] == word)
-      if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
-        wbw_found_in_DB <- append(wbw_found_in_DB, toString(tibbletest[row, 1]))
-        wbw_klattese <- append(wbw_klattese, toString(tibbletest[row, 2]))
-        wbw_wf <- append(wbw_wf, toString(tibbletest[row, 3]))
-      }
-    }
-    
-    # transform vectors into data frames
-    wbw_found_in_DB <- as.data.frame(wbw_found_in_DB)
-    wbw_klattese <- as.data.frame(wbw_klattese)
-    wbw_wf <- as.data.frame(wbw_wf)
-    
-    wbw_found_in_db_length = length(wbw_found_in_DB)
-    
-    # calculate wcm for each word 
-    for(word in 1:wbw_found_in_db_length) {
-      klattese <- wbw_klattese[word,1]
-      phon_points <- calculateWCM(klattese)
-      
-      # store results in word by word df 
-      word_by_word[wbw_row, 1] = wbw_found_in_DB[word, 1]
-      word_by_word[wbw_row, 2] = klattese
-      word_by_word[wbw_row, 3] = phon_points
-      word_by_word[wbw_row, 4] = as.double(wbw_wf[word, 1])
-      
-      wbw_row = wbw_row + 1  # move to next row in the word by word df 
-      
-      # add data for this word to cumulative total 
-      phon_total = phon_total + phon_points
-      wf_total = wf_total + as.double(wbw_wf[word, 1])
-    }
-    
-    output$word_by_word <- renderDataTable(
-      word_by_word, TRUE
-    )
-  })
-  
-  output$average <- reactive({
-    req(input$word_by_word)
-    
-    data[1,1] = wbw_english_length
-    data[1,2] = wbw_found_in_db_length
-    data[1,3] = phon_total/wbw_found_in_db_length
-    data[1,4] = wf_total/wbw_found_in_db_length
-    
-    output$average <- renderDataTable (
+  output$word_by_word <- renderDataTable(
+    word_by_word, TRUE
+  )
+
+  output$average <- renderDataTable (
       data, TRUE
-    )
-  })
-  
+  )
 }
 
 shinyApp(ui, server)
