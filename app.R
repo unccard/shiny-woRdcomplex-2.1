@@ -27,9 +27,9 @@ server <- function(input, output) {
   tibbletest <-tibble(word_db$Word, word_db$KlatteseSyll, word_db$Zipf.value)
   
   # set up data frame to store average results  
-  data <- data.frame(matrix(vector(), ncol=4))  # data frame to store avg output  
+  avg_data <- data.frame(matrix(vector(), ncol=4))  # data frame to store avg output  
   header_names <- list("Total_Words_in_Tscript", "Total_Words_Found_in_DB","Avg_WCM_Score","Avg_WF_Score")  # column headers for avg output df 
-  colnames(data) <- header_names
+  colnames(avg_data) <- header_names
   
   # set up data frame to store word by word results 
   word_by_word <- data.frame(matrix(vector(), ncol=4))  # data frame to store info ab individual words from each transcript
@@ -49,7 +49,7 @@ server <- function(input, output) {
     retrieveDBInfo(vals, tibbletest)  # add info from database to collection
     asDataFrame(vals) # transform reactive vectors into data frames 
     updateWordByWord(vals, word_by_word, wbw_row)  # perform wcm calculations and store in word by word df 
-    updateAverage(vals, data)  # perform average calculations and store in average df 
+    updateAverage(vals, avg_data)  # perform average calculations and store in average df 
   })
 
   output$word_by_word <- renderDataTable(
@@ -58,7 +58,7 @@ server <- function(input, output) {
   )
 
   output$average <- renderDataTable (
-      data, caption = "Average",
+      avg_data, caption = "Average",
       server = TRUE
   )
 }

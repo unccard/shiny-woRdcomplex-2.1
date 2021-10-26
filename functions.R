@@ -55,9 +55,12 @@ retrieveDBInfo <- function(vals, tibbletest) {
     row <- as.integer(which(tibbletest[,1] == word))
     # if(length(row) == 0)  # if word not found in db, handle error 
     if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
-      vals$wbw_found_in_DB <- append(vals$wbw_found_in_DB, toString(tibbletest[row, 1]))
-      vals$wbw_klattese <- append(vals$wbw_klattese, toString(tibbletest[row, 2]))
-      vals$wbw_wf <- append(vals$wbw_wf, toString(tibbletest[row, 3]))
+      #vals$wbw_found_in_DB <- append(vals$wbw_found_in_DB, toString(tibbletest[row, 1]))
+      #vals$wbw_klattese <- append(vals$wbw_klattese, toString(tibbletest[row, 2]))
+      #vals$wbw_wf <- append(vals$wbw_wf, toString(tibbletest[row, 3]))
+      new_found_in_DB <- c(toString(tibbletest[row, 1]))
+      vals$wbw_found_in_DB <- do.call(reactiveValues, vals$wbw_found_in_DB)
+      
     }
   }
 }
@@ -87,10 +90,10 @@ updateWordByWord <- function(vals, word_by_word, wbw_row) {
   }
 }
 
-updateAverage <- function(vals, data) {
-  data[1,1] = length(vals$wbw_english_df)
-  data[1,2] = length(vals$wbw_found_in_DB_df)
-  data[1,3] = vals$phon_total/length(vals$wbw_found_in_DB_df)
-  data[1,4] = vals$wf_total/length(vals$wbw_found_in_DB_df)
+updateAverage <- function(vals, avg_data) {
+  avg_data[1,1] = length(vals$wbw_english_df)
+  avg_data[1,2] = length(vals$wbw_found_in_DB_df)
+  avg_data[1,3] = vals$phon_total/length(vals$wbw_found_in_DB_df)
+  avg_data[1,4] = vals$wf_total/length(vals$wbw_found_in_DB_df)
 }
 
