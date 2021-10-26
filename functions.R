@@ -43,7 +43,7 @@ calculateWCM <- function(klattese) {  # calculate WCM score for the word
     }
   }
   # WCM rules for word patterns 
-  if (syllables > 2) phon_points=phon_points+1  # word patterns (1)
+  if (syllables >= 2) phon_points=phon_points+1  # word patterns (1)
   if (nonInitPrimStress == 1) phon_points=phon_points+1  # word patterns (2)
   
   return(phon_points) 
@@ -87,8 +87,8 @@ updateWordByWord <- function(vals, word_by_word, wbw_row) {
 }
 
 updateAverage <- function(vals, data) {
-  data[1,1] = length(vals$wbw_english)
-  data[1,2] = length(vals$wbw_found_in_DB)
-  data[1,3] = vals$phon_total/length(vals$wbw_found_in_DB)
-  data[1,4] = vals$wf_total/length(vals$wbw_found_in_DB)
+  data[1,1] = length(vals$wbw_english_df)
+  data[1,2] = length(vals$wbw_found_in_DB_df)
+  data[1,3] = vals$phon_total/length(vals$wbw_found_in_DB_df)
+  data[1,4] = vals$wf_total/length(vals$wbw_found_in_DB_df)
 }
