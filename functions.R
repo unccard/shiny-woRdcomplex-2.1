@@ -59,8 +59,7 @@ retrieveDBInfo <- function(vals, tibbletest) {
       #vals$wbw_klattese <- append(vals$wbw_klattese, toString(tibbletest[row, 2]))
       #vals$wbw_wf <- append(vals$wbw_wf, toString(tibbletest[row, 3]))
       new_found_in_DB <- c(toString(tibbletest[row, 1]))
-      vals$wbw_found_in_DB <- do.call(reactiveValues, vals$wbw_found_in_DB)
-      
+      vals$wbw_found_in_DB <- do.call(reactiveValues, new_found_in_DB)
     }
   }
 }
