@@ -50,6 +50,10 @@ server <- function(input, output) {
     wbw_english <- strsplit(input$sample, "[ ?\r?\n]")
     wbw_english_length = length(wbw_english)
     
+    output$klattese <- renderDataTable(
+      as.data.frame(strsplit(input$sample, "[ ?\r?\n]")),  # each space or newline creates a new entry in DT 
+      TRUE)
+    
     # retrieve information from word db 
     for(i in 1:wbw_english_length) {
       word <- wbw_english[[1]][i]
