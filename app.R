@@ -47,22 +47,24 @@ server <- function(input, output) {
     Word_Frequency=NA
   )
   
+  vals$phon_total <- vals$wf_total <- 0 
   vals$wbw_row <- 1  # keep track of which row of word by word output we are on 
   vals$all_word_info <- c()  # vector where we will track all info for all words 
   
   # When the submit button is clicked... 
   observeEvent(input$submit,{
     req(input$sample)  # verify input is not empty
+    vals$wbw_english <- c()  # clear previous inputs before adding new 
     vals$wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline
     for(word in 1:length(vals$wbw_english[[1]])) {  # loop through input to gather info on each word
       this_word_info <- retrieveDBInfo(vals, vals$wbw_english[[1]][word], tibbletest)
-      print("retrieve Db Info success")
       vals$all_word_info <- append(vals$all_word_info, this_word_info)
     }
+    print("retrieve Db Info success")
     vals$word_by_word <- updateWordByWord(vals)  # perform word by word calculations and store in wbw df
-    print("test1")
+    print("update word by word success")
     vals$avg_data <- updateAverage(vals)  # perform average calculations and store in average df
-    print("test2")
+    print("update average data success")
   })
 
   # display the word by word output
