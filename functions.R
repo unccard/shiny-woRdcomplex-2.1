@@ -46,15 +46,15 @@ calculateWCM <- function(klattese) {
   return(phon_points) 
 }
 
-# This function verifies that the english orthography is in the database and retrieves its klattese and wf values 
+# This function verifies that the English orthography is in the database and retrieves its Klattese and wf values 
 retrieveDBInfo <- function(vals, word, tibbletest) {
   this_word_info <- c()  # contains info for the current word 
   row <- as.integer(which(tibbletest[,1] == word))
   # if(length(row) == 0)  # if word not found in db, handle error 
   if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
-    this_word_info <- append(this_word_info, toString(tibbletest[row, 1]))  # first element is english word
-    this_word_info <- append(this_word_info, toString(tibbletest[row, 2]))  # second element is klattese
-    this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is wf 
+    this_word_info <- append(this_word_info, toString(tibbletest[row, 1]))  # first element is English word
+    this_word_info <- append(this_word_info, toString(tibbletest[row, 2]))  # second element is Klattese
+    this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is word frequency
   }
   return(this_word_info)
 }
@@ -63,13 +63,13 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
 updateWordByWord <- function(vals) {
   for(word in 1:length(vals$all_word_info)) {
     this_word_info <- vals$all_word_info[[word]]
-    phon_points <- calculateWCM(vals$this_word_info[[2]])  # calculate wcm using klattese of this word
+    phon_points <- calculateWCM(vals$this_word_info[[2]])  # calculate WCM using Klattese of this word
     # store results in word by word df 
-    vals$word_by_word[wbw_row, 1] = this_word_info[[1]]  # english orthography of this word 
-    vals$word_by_word[wbw_row, 2] = this_word_info[[2]]  # klattese of this word 
-    vals$word_by_word[wbw_row, 3] = phon_points
+    vals$word_by_word[wbw_row, 1] = this_word_info[[1]]  # English orthography of this word 
+    vals$word_by_word[wbw_row, 2] = this_word_info[[2]]  # Klattese of this word 
+    vals$word_by_word[wbw_row, 3] = phon_points  # WCM score of this word
     vals$word_by_word[wbw_row, 4] = this_word_info[[3]]  # word frequency of this word 
-    # move to next row in the word by word df 
+    # move to next row in the word by word data frame
     vals$wbw_row = vals$wbw_row + 1  
     # add data for this word to cumulative total 
     vals$phon_total <- vals$phon_total + phon_points
@@ -80,10 +80,10 @@ updateWordByWord <- function(vals) {
 
 # This function concatenates the average data in the data frame 
 updateAverage <- function(vals) {
-  vals$avg_data[1,1] = length(vals$wbw_english_df)
-  vals$avg_data[1,2] = length(vals$wbw_found_in_DB_df)
-  vals$avg_data[1,3] = vals$phon_total/length(vals$wbw_found_in_DB_df)
-  vals$avg_data[1,4] = vals$wf_total/length(vals$wbw_found_in_DB_df)
+  vals$avg_data[1,1] = length(vals$wbw_english_df)  # Total number of words in the input
+  vals$avg_data[1,2] = length(vals$all_word_info)  # Total number of words found in the database
+  vals$avg_data[1,3] = vals$phon_total/length(vals$all_word_info)  # Average WCM score 
+  vals$avg_data[1,4] = vals$wf_total/length(vals$all_word_info)  # Average word frequency 
   return(vals$avg_data)
 }
 

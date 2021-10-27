@@ -53,9 +53,9 @@ server <- function(input, output) {
   # When the submit button is clicked... 
   observeEvent(input$submit,{
     req(input$sample)  # verify input is not empty
-    wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline 
-    for(word in 1:length(wbw_english)) {  # loop through input to gather info on each word 
-      vals$all_word_info <- append(vals$all_word_info, retrieveDBInfo(vals, wbw_english[[1]][word], tibbletest))  
+    vals$wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline 
+    for(word in 1:length(vals$wbw_english)) {  # loop through input to gather info on each word 
+      vals$all_word_info <- append(vals$all_word_info, retrieveDBInfo(vals, vals$wbw_english[[1]][word], tibbletest))  
     }
     vals$word_by_word <- updateWordByWord(vals)  # perform word by word calculations and store in wbw df 
     vals$avg_data <- updateAverage(vals)  # perform average calculations and store in average df 
