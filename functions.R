@@ -1,5 +1,5 @@
 # This function calculates the WCM score for a Klattese word 
-calculateWCM <- function(vals) { 
+calculateWCM <- function(klattese) { 
   # phoneme categories 
   engl_voiceless_cons <- c("C","f","h","k","p","s","S","t","T")
   engl_voiced_cons <- c("b","d","D","F","g","J","l","M","m","N","n","G","r","v","w","y","z","Z")  # word final M and N? 
@@ -9,7 +9,6 @@ calculateWCM <- function(vals) {
   engl_velars <- c("k","g","G")
   engl_liquids <- c("l","L","r","R","X")
   
-  klattese <- vals$all_word_info[[2]]
   phon_points <- 0 
   syllables <- 1
   nonInitPrimStress <- 0
@@ -68,20 +67,19 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
 
 # This function concatenates all the data for each word in the data frame 
 updateWordByWord <- function(vals) {
-  for(word in 1:length(vals$all_word_info)) {
-    this_word_info <- vals$all_word_info[[word]]
-    print("word info")
-    print(this_word_info)
+  for(word in 1:(length(vals$all_word_info))/3) {
+    print("all word")
     print(vals$all_word_info)
-    #phon_points <- calculateWCM(vals$this_word_info[[2]])  # calculate WCM using Klattese of this word
-    phon_points <- calculateWCM(vals)  # calculate WCM using Klattese of this word
+    print("klattese")
+    print(vals$all_word_info[[1]][word*3-1])
+    phon_points <- calculateWCM(vals$all_word_info[[(word*3)-1]])  # calculate WCM using Klattese of this word
     # store results in word by word df 
-    vals$word_by_word[vals$wbw_row, 1] = this_word_info[[1]][1]  # English orthography of this word 
+    vals$word_by_word[vals$wbw_row, 1] = this_word_info[[(word*3)-2]]  # English orthography of this word 
     print("wbw1")
-    vals$word_by_word[vals$wbw_row, 2] = this_word_info[[1]][2]  # Klattese of this word 
+    vals$word_by_word[vals$wbw_row, 2] = this_word_info[[(word*3)-1]]  # Klattese of this word 
     print("wbw2")
     vals$word_by_word[vals$wbw_row, 3] = phon_points  # WCM score of this word
-    vals$word_by_word[vals$wbw_row, 4] = this_word_info[[1]][3]  # word frequency of this word
+    vals$word_by_word[vals$wbw_row, 4] = this_word_info[[word*3]]  # word frequency of this word
     print("wbw3")
     # move to next row in the word by word data frame
     vals$wbw_row = vals$wbw_row + 1  
