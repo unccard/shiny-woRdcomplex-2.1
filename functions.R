@@ -1,4 +1,5 @@
-calculateWCM <- function(klattese) {  # calculate WCM score for the word 
+# This function calculates the WCM score for a Klattese word 
+calculateWCM <- function(klattese) { 
   # phoneme categories 
   engl_voiceless_cons <- c("C","f","h","k","p","s","S","t","T")
   engl_voiced_cons <- c("b","d","D","F","g","J","l","M","m","N","n","G","r","v","w","y","z","Z")  # word final M and N? 
@@ -11,14 +12,12 @@ calculateWCM <- function(klattese) {  # calculate WCM score for the word
   phon_points <- 0 
   syllables <- 1
   nonInitPrimStress <- 0
-  
   # if the word ends in a consonant 
   len <- str_length(klattese)
   final_phoneme <- substr(klattese, len, len)
   if (final_phoneme %in% engl_voiced_cons | final_phoneme %in% engl_voiceless_cons) { 
     phon_points=phon_points+1  # syllable structures (1)
   } 
-  
   # if the word has consonant clusters 
   split <- strsplit(klattese, "([iIEe@aWY^cOoUuRx|X\\ˈ]+|-+)+")  # regular expression to isolate consonants 
   for(i in 1:length(split[[1]])) {
@@ -26,7 +25,6 @@ calculateWCM <- function(klattese) {  # calculate WCM score for the word
       phon_points = phon_points + 1  # syllable structures (2)
     }
   }
-  
   # for loop to assign points for sound classes, and find stress and syllables 
   for (i in 1:str_length(klattese)) {
     phoneme <- substr(klattese, i, i)
@@ -45,10 +43,10 @@ calculateWCM <- function(klattese) {  # calculate WCM score for the word
   # WCM rules for word patterns 
   if (syllables >= 2) phon_points=phon_points+1  # word patterns (1)
   if (nonInitPrimStress == 1) phon_points=phon_points+1  # word patterns (2)
-  
   return(phon_points) 
 }
 
+# This function verifies that the english orthography is in the database and retrieves its klattese and wf values 
 retrieveDBInfo <- function(vals, word, tibbletest) {
   this_word_info <- c()  # contains info for the current word 
   row <- as.integer(which(tibbletest[,1] == word))
@@ -61,19 +59,18 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
   return(this_word_info)
 }
 
+# This function concatenates all the data for each word in the data frame 
 updateWordByWord <- function(vals) {
   for(word in 1:length(vals$all_word_info)) {
     this_word_info <- vals$all_word_info[[word]]
     phon_points <- calculateWCM(vals$this_word_info[[2]])  # calculate wcm using klattese of this word
-    
     # store results in word by word df 
     vals$word_by_word[wbw_row, 1] = this_word_info[[1]]  # english orthography of this word 
     vals$word_by_word[wbw_row, 2] = this_word_info[[2]]  # klattese of this word 
     vals$word_by_word[wbw_row, 3] = phon_points
     vals$word_by_word[wbw_row, 4] = this_word_info[[3]]  # word frequency of this word 
-    
-    vals$wbw_row = vals$wbw_row + 1  # move to next row in the word by word df 
-    
+    # move to next row in the word by word df 
+    vals$wbw_row = vals$wbw_row + 1  
     # add data for this word to cumulative total 
     vals$phon_total <- vals$phon_total + phon_points
     vals$wf_total <- vals$wf_total + as.double(vals$wbw_wf[word, 1])
@@ -81,6 +78,7 @@ updateWordByWord <- function(vals) {
   return(vals$word_by_word)
 }
 
+# This function concatenates the average data in the data frame 
 updateAverage <- function(vals) {
   vals$avg_data[1,1] = length(vals$wbw_english_df)
   vals$avg_data[1,2] = length(vals$wbw_found_in_DB_df)

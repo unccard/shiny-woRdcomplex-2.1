@@ -16,6 +16,7 @@ ui <- fluidPage(
     actionButton("submit", "Calculate WCM")
   ),
   
+  # Main panel with outputs
   mainPanel(
     DT::dataTableOutput("word_by_word", "auto", "auto"), 
     DT::dataTableOutput("average", "auto", "auto")
@@ -26,8 +27,11 @@ server <- function(input, output) {
   word_db <- read.csv('UNCWordDB-2021-10-08.csv', na.strings=c("", "NA"))
   tibbletest <- tibble(word_db$Word, word_db$KlatteseSyll, word_db$Zipf.value)
   
+  # Stores all values that are changed during the program 
+  # Index anything stored here using vals$var_name
   vals <- reactiveValues()
   
+  # Initialize reactive average df 
   vals$avg_data <- data.frame(
     Total_Words_in_Tscript=NA,
     Total_Words_Found_in_DB=NA,
@@ -35,6 +39,7 @@ server <- function(input, output) {
     Avg_WF_Score=NA
   )
   
+  # Initialize reactive word by word df 
   vals$word_by_word <- data.frame(
     English=NA,
     Klattese=NA,
@@ -45,21 +50,24 @@ server <- function(input, output) {
   vals$wbw_row <- 1  # keep track of which row of word by word output we are on 
   vals$all_word_info <- c()  # vector where we will track all info for all words 
   
+  # When the submit button is clicked... 
   observeEvent(input$submit,{
     req(input$sample)  # verify input is not empty
     wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline 
-    for(word in 1:length(wbw_english)) {
-      vals$all_word_info <- append(vals$all_word_info, retrieveDBInfo(vals, wbw_english[[1]][word], tibbletest))  # add info from database to collection
+    for(word in 1:length(wbw_english)) {  # loop through input to gather info on each word 
+      vals$all_word_info <- append(vals$all_word_info, retrieveDBInfo(vals, wbw_english[[1]][word], tibbletest))  
     }
-    vals$word_by_word <- updateWordByWord(vals)  # perform wcm calculations and store in word by word df 
+    vals$word_by_word <- updateWordByWord(vals)  # perform word by word calculations and store in wbw df 
     vals$avg_data <- updateAverage(vals)  # perform average calculations and store in average df 
   })
 
+  # display the word by word output
   output$word_by_word <- renderDataTable(
     vals$word_by_word, caption = "Word by Word",
     server = TRUE
   )
 
+  # display the average output
   output$average <- renderDataTable (
       vals$avg_data, caption = "Average",
       server = TRUE
