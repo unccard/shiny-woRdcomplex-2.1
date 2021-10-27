@@ -43,7 +43,6 @@ calculateWCM <- function(klattese) {
   # WCM rules for word patterns 
   if (syllables >= 2) phon_points=phon_points+1  # word patterns (1)
   if (nonInitPrimStress == 1) phon_points=phon_points+1  # word patterns (2)
-  print("wcm calculation success")
   return(phon_points) 
 }
 
@@ -56,11 +55,8 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
   # if(length(row) == 0)  # if word not found in db, handle error 
   if(isTruthy(!identical(toString(tibbletest[row, 2]),"character(0)"))) {  # omit words not found in word_db
     this_word_info <- append(this_word_info, toString(tibbletest[row, 1]))  # first element is English word
-    print(toString(tibbletest[row, 1]))
     this_word_info <- append(this_word_info, toString(tibbletest[row, 2]))  # second element is Klattese
-    toString(tibbletest[row, 2])
     this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is word frequency
-    toString(tibbletest[row, 1])
   }
   return(this_word_info)
 }
@@ -78,17 +74,21 @@ updateWordByWord <- function(vals) {
     vals$wbw_row = vals$wbw_row + 1  
     # add data for this word to cumulative total 
     vals$phon_total <- vals$phon_total + phon_points
-    vals$wf_total <- vals$wf_total + vals$word_by_word[word, 3]
+    vals$wf_total <- as.double(vals$wf_total) + as.double(vals$word_by_word[word, 4])
   }
   return(vals$word_by_word)
 }
 
 # This function concatenates the average data in the data frame 
 updateAverage <- function(vals) {
-  vals$avg_data[1,1] = length(vals$wbw_english_df)  # Total number of words in the input
-  vals$avg_data[1,2] = length(vals$all_word_info)  # Total number of words found in the database
-  vals$avg_data[1,3] = vals$phon_total/length(vals$all_word_info)  # Average WCM score 
-  vals$avg_data[1,4] = vals$wf_total/length(vals$all_word_info)  # Average word frequency 
+  vals$avg_data[1,1] = length(vals$wbw_english)  # Total number of words in the input
+  vals$avg_data[1,2] = nrow(vals$word_by_word)  # Total number of words found in the database
+  vals$avg_data[1,3] = vals$phon_total/nrow(vals$word_by_word)  # Average WCM score 
+  vals$avg_data[1,4] = as.double(vals$wf_total)/nrow(vals$word_by_word)  # Average word frequency 
+  print("wf total")
+  print(vals$wf_total)
+  print("num rows")
+  print(nrow(vals$word_by_word))
   return(vals$avg_data)
 }
 
