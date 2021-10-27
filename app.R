@@ -54,9 +54,11 @@ server <- function(input, output) {
   observeEvent(input$submit,{
     req(input$sample)  # verify input is not empty
     vals$wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline 
-    print(vals$wbw_english)
     for(word in 1:length(vals$wbw_english)) {  # loop through input to gather info on each word 
-      vals$all_word_info <- append(vals$all_word_info, retrieveDBInfo(vals, vals$wbw_english[[1]][word], tibbletest))  
+      print(vals$wbw_english[[word]][word])
+      this_word_info <- retrieveDBInfo(vals, vals$wbw_english[[word]][word], tibbletest)
+      print(this_word_info)
+      vals$all_word_info <- append(vals$all_word_info, this_word_info)  
     }
     print(vals$all_word_info)
     print("test")
