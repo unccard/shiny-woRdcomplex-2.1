@@ -24,7 +24,7 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   word_db <- read.csv('UNCWordDB-2021-10-08.csv', na.strings=c("", "NA"))
-  tibbletest <-tibble(word_db$Word, word_db$KlatteseSyll, word_db$Zipf.value)
+  tibbletest <- tibble(word_db$Word, word_db$KlatteseSyll, word_db$Zipf.value)
   
   vals <- reactiveValues()
   
@@ -33,7 +33,7 @@ server <- function(input, output) {
     Total_Words_Found_in_DB=NA,
     Avg_WCM_Score=NA,
     Avg_WF_Score=NA
-  ) 
+  )
   
   vals$word_by_word <- data.frame(
     English=NA,
@@ -43,11 +43,14 @@ server <- function(input, output) {
   )
   
   vals$wbw_row <- 1  # keep track of which row of word by word output we are on 
+  vals$all_word_info <- c()  # vector where we will track all info for all words 
   
   observeEvent(input$submit,{
     req(input$sample)  # verify input is not empty
-    vals$wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline 
-    vals$all_word_info <- retrieveDBInfo(vals, tibbletest)  # add info from database to collection
+    wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline 
+    for(word in 1:length(wbw_english)) {
+      vals$all_word_info <- append(vals$all_word_info, retrieveDBInfo(vals, wbw_english[[1]][word], tibbletest))  # add info from database to collection
+    }
     vals$word_by_word <- updateWordByWord(vals)  # perform wcm calculations and store in word by word df 
     vals$avg_data <- updateAverage(vals)  # perform average calculations and store in average df 
   })

@@ -49,21 +49,16 @@ calculateWCM <- function(klattese) {  # calculate WCM score for the word
   return(phon_points) 
 }
 
-retrieveDBInfo <- function(vals, tibbletest) {
-  vals$all_word_info <- c()  # we will return this with info for all words 
-  for(i in 1:length(vals$wbw_english)) {
-    this_word_info <- c()  # contains info for the current word 
-    word <- vals$wbw_english[[1]][i]
-    row <- as.integer(which(tibbletest[,1] == word))
-    # if(length(row) == 0)  # if word not found in db, handle error 
-    if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
-      this_word_info <- append(this_word_info, toString(tibbletest[row, 1]))  # first element is english word
-      this_word_info <- append(this_word_info, toString(tibbletest[row, 2]))  # second element is klattese
-      this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is wf 
-    }
-    vals$all_word_info <- append(vals$all_word_info, this_word_info)  # add info for current word to info for all words 
+retrieveDBInfo <- function(vals, word, tibbletest) {
+  this_word_info <- c()  # contains info for the current word 
+  row <- as.integer(which(tibbletest[,1] == word))
+  # if(length(row) == 0)  # if word not found in db, handle error 
+  if(!identical(toString(tibbletest[row, 2]),"character(0)")) {  # omit words not found in word_db
+    this_word_info <- append(this_word_info, toString(tibbletest[row, 1]))  # first element is english word
+    this_word_info <- append(this_word_info, toString(tibbletest[row, 2]))  # second element is klattese
+    this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is wf 
   }
-  return(vals$all_word_info)
+  return(this_word_info)
 }
 
 updateWordByWord <- function(vals) {
