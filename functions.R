@@ -81,7 +81,7 @@ updateWordByWord <- function(vals) {
 
 # This function concatenates the average data in the data frame 
 updateAverage <- function(vals) {
-  vals$avg_data[1,1] = length(vals$wbw_english)  # Total number of words in the input
+  vals$avg_data[1,1] = length(vals$wbw_english[[1]])  # Total number of words in the input
   vals$avg_data[1,2] = nrow(vals$word_by_word)  # Total number of words found in the database
   vals$avg_data[1,3] = vals$phon_total/nrow(vals$word_by_word)  # Average WCM score 
   vals$avg_data[1,4] = as.double(vals$wf_total)/nrow(vals$word_by_word)  # Average word frequency 
