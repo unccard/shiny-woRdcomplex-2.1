@@ -63,6 +63,12 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
 
 # This function concatenates all the data for each word in the data frame 
 updateWordByWord <- function(vals) {
+  vals$word_by_word <- data.frame(
+    English=NA,
+    Klattese=NA,
+    WCM_Score=NA,
+    Word_Frequency=NA
+  )
   for(word in 1:((length(vals$all_word_info))/3)) {
     phon_points <- calculateWCM(vals$all_word_info[[(word*3)-1]])  # calculate WCM using Klattese of this word
     # store results in word by word df 
@@ -81,6 +87,12 @@ updateWordByWord <- function(vals) {
 
 # This function concatenates the average data in the data frame 
 updateAverage <- function(vals) {
+  vals$avg_data <- data.frame(
+    Total_Words_in_Tscript=NA,
+    Total_Words_Found_in_DB=NA,
+    Avg_WCM_Score=NA,
+    Avg_WF_Score=NA
+  )
   vals$avg_data[1,1] = length(vals$wbw_english[[1]])  # Total number of words in the input
   vals$avg_data[1,2] = nrow(vals$word_by_word)  # Total number of words found in the database
   vals$avg_data[1,3] = vals$phon_total/nrow(vals$word_by_word)  # Average WCM score 

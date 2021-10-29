@@ -32,28 +32,27 @@ server <- function(input, output) {
   vals <- reactiveValues()
   
   # Initialize reactive average df 
-  vals$avg_data <- data.frame(
-    Total_Words_in_Tscript=NA,
-    Total_Words_Found_in_DB=NA,
-    Avg_WCM_Score=NA,
-    Avg_WF_Score=NA
-  )
+  # vals$avg_data <- data.frame(
+  #   Total_Words_in_Tscript=NA,
+  #   Total_Words_Found_in_DB=NA,
+  #   Avg_WCM_Score=NA,
+  #   Avg_WF_Score=NA
+  # )
   
   # Initialize reactive word by word df 
-  vals$word_by_word <- data.frame(
-    English=NA,
-    Klattese=NA,
-    WCM_Score=NA,
-    Word_Frequency=NA
-  )
-  
-  vals$phon_total <- vals$wf_total <- 0 
-  vals$wbw_row <- 1  # keep track of which row of word by word output we are on 
-  vals$all_word_info <- c()  # vector where we will track all info for all words 
+  # vals$word_by_word <- data.frame(
+  #   English=NA,
+  #   Klattese=NA,
+  #   WCM_Score=NA,
+  #   Word_Frequency=NA
+  # )
   
   # When the submit button is clicked... 
   observeEvent(input$submit,{
     req(input$sample)  # verify input is not empty
+    vals$phon_total <- vals$wf_total <- 0 
+    vals$all_word_info <- c()  # vector where we will track all info for all words
+    vals$wbw_row <- 1  # keep track of which row of word by word output we are on
     vals$wbw_english <- c()  # clear previous inputs before adding new 
     vals$wbw_english <- strsplit(input$sample, "[ ?\r?\n]") # split reactive input on any space or newline
     for(word in 1:length(vals$wbw_english[[1]])) {  # loop through input to gather info on each word
