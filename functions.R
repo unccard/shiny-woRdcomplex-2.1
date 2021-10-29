@@ -50,8 +50,6 @@ calculateWCM <- function(klattese) {
 retrieveDBInfo <- function(vals, word, tibbletest) {
   this_word_info <- c()  # contains info for the current word 
   row <- as.integer(which(tibbletest[,1] == word))
-  #print(word)
-  #print(row)
   # if(length(row) == 0)  # if word not found in db, handle error 
   if(isTruthy(!identical(toString(tibbletest[row, 2]),"character(0)"))) {  # omit words not found in word_db
     this_word_info <- append(this_word_info, toString(tibbletest[row, 1]))  # first element is English word
@@ -93,14 +91,10 @@ updateAverage <- function(vals) {
     Avg_WCM_Score=NA,
     Avg_WF_Score=NA
   )
-  vals$avg_data[1,1] = length(vals$wbw_english[[1]])  # Total number of words in the input
+  vals$avg_data[1,1] = length(vals$wbw_english)  # Total number of words in the input
   vals$avg_data[1,2] = nrow(vals$word_by_word)  # Total number of words found in the database
   vals$avg_data[1,3] = vals$phon_total/nrow(vals$word_by_word)  # Average WCM score 
   vals$avg_data[1,4] = as.double(vals$wf_total)/nrow(vals$word_by_word)  # Average word frequency 
-  print("wf total")
-  print(vals$wf_total)
-  print("num rows")
-  print(nrow(vals$word_by_word))
   return(vals$avg_data)
 }
 
