@@ -15,7 +15,7 @@ calculateWCM <- function(klattese) {
   # if the word ends in a consonant 
   len <- str_length(klattese)
   final_phoneme <- substr(klattese, len, len)
-  if (final_phoneme %in% engl_voiced_cons | final_phoneme %in% engl_voiceless_cons | engl_syll_cons) { 
+  if (final_phoneme %in% engl_voiced_cons | final_phoneme %in% engl_voiceless_cons | final_phoneme %in% engl_syll_cons) { 
     phon_points=phon_points+1  # syllable structures (1)
   } 
   # if the word has consonant clusters 
