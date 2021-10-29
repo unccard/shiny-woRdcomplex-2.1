@@ -31,22 +31,6 @@ server <- function(input, output) {
   # Index anything stored here using vals$var_name
   vals <- reactiveValues()
   
-  # Initialize reactive average df 
-  # vals$avg_data <- data.frame(
-  #   Total_Words_in_Tscript=NA,
-  #   Total_Words_Found_in_DB=NA,
-  #   Avg_WCM_Score=NA,
-  #   Avg_WF_Score=NA
-  # )
-  
-  # Initialize reactive word by word df 
-  # vals$word_by_word <- data.frame(
-  #   English=NA,
-  #   Klattese=NA,
-  #   WCM_Score=NA,
-  #   Word_Frequency=NA
-  # )
-  
   # When the submit button is clicked... 
   observeEvent(input$submit,{
     req(input$sample)  # verify input is not empty
