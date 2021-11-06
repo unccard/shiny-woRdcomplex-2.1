@@ -73,7 +73,7 @@ updateWordByWord <- function(vals) {
     vals$word_by_word[vals$wbw_row, 1] = vals$all_word_info[[(word*3)-2]]  # English orthography of this word 
     vals$word_by_word[vals$wbw_row, 2] = vals$all_word_info[[(word*3)-1]]  # Klattese of this word 
     vals$word_by_word[vals$wbw_row, 3] = phon_points  # WCM score of this word
-    vals$word_by_word[vals$wbw_row, 4] = as.double(vals$all_word_info[[word*3]])  # word frequency of this word
+    vals$word_by_word[vals$wbw_row, 4] = round(as.double(vals$all_word_info[[word*3]]), 3)  # word frequency of this word
     # move to next row in the word by word data frame
     vals$wbw_row = vals$wbw_row + 1  
     # add data for this word to cumulative total 
@@ -93,8 +93,8 @@ updateAverage <- function(vals) {
   )
   vals$avg_data[1,1] = length(vals$wbw_english)  # Total number of words in the input
   vals$avg_data[1,2] = nrow(vals$word_by_word)  # Total number of words found in the database
-  vals$avg_data[1,3] = vals$phon_total/nrow(vals$word_by_word)  # Average WCM score 
-  vals$avg_data[1,4] = as.double(vals$wf_total)/nrow(vals$word_by_word)  # Average word frequency 
+  vals$avg_data[1,3] = round(vals$phon_total/nrow(vals$word_by_word), 3)  # Average WCM score 
+  vals$avg_data[1,4] = round(as.double(vals$wf_total)/nrow(vals$word_by_word), 3)  # Average word frequency 
   return(vals$avg_data)
 }
 
