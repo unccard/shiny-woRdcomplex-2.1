@@ -20,13 +20,21 @@ ui <- fluidPage(
   sidebarPanel(
     textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%"), 
     actionButton("submit", "Calculate WCM"), 
-    
+    HTML("<hr>"),
+    fluidRow("Notes:", 
+             tags$ul(
+               tags$li("Your input may be separated by space or newline characters."), 
+               tags$li("Possessive 's may cause an input not to be recognized, be sure to remove these characters."), 
+               tags$li("This app does not save data between calculations. Be sure to use the download buttons if you need to save your data."), 
+               tags$li("For more information on WCM, Zipf Frequency, and our database, refer to our GitHub.")
+             ))
   ),
   
   # Main panel with outputs
   mainPanel(
     DT::dataTableOutput("word_by_word", "auto", "auto"), 
     downloadButton("downloadWBW", "Download"), 
+    HTML("<hr>"),
     DT::dataTableOutput("average", "auto", "auto"), 
     downloadButton("downloadAVG", "Download")
   )
