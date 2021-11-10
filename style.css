@@ -1,1 +1,5 @@
-
+#word_by_word {
+  border-style: solid;
+  border-color: blue;
+  border-width: 10px;
+}

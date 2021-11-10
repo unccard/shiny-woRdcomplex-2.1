@@ -65,7 +65,7 @@ updateWordByWord <- function(vals) {
     English=NA,
     Klattese=NA,
     WCM_Score=NA,
-    Word_Frequency=NA
+    Zipf_Word_Frequency=NA
   )
   for(word in 1:((length(vals$all_word_info))/3)) {
     phon_points <- calculateWCM(vals$all_word_info[[(word*3)-1]])  # calculate WCM using Klattese of this word
@@ -86,10 +86,10 @@ updateWordByWord <- function(vals) {
 # This function concatenates the average data in the data frame 
 updateAverage <- function(vals) {
   vals$avg_data <- data.frame(
-    Total_Words_in_Tscript=NA,
-    Total_Words_Found_in_DB=NA,
+    Words_in_Script=NA,
+    Words_in_DB=NA,
     Avg_WCM_Score=NA,
-    Avg_WF_Score=NA
+    Avg_Zipf_WF_Score=NA
   )
   vals$avg_data[1,1] = length(vals$wbw_english)  # Total number of words in the input
   vals$avg_data[1,2] = nrow(vals$word_by_word)  # Total number of words found in the database

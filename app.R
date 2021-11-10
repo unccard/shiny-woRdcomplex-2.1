@@ -7,13 +7,20 @@ library(stringr)
 source("functions.R")
 
 ui <- fluidPage(
+  tags$link(rel = "stylesheet", type = "text/css", href = "style.css"),
+  
+  navbarPage(
+    "UNC Center for Aphasia and Related Disorders"
+  ),
+  
   # App title 
   headerPanel("Word Complexity Measure"),
   
   # Sidebar panel with inputs 
   sidebarPanel(
     textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%"), 
-    actionButton("submit", "Calculate WCM")
+    actionButton("submit", "Calculate WCM"), 
+    
   ),
   
   # Main panel with outputs
@@ -26,6 +33,10 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
+  
+  # shinyjs::hide("downloadWBW")
+  # shinyjs::hide("downloadAVG")
+  
   word_db <- read.csv('UNCWordDB-2021-10-08.csv', na.strings=c("", "NA"))
   tibbletest <- tibble(word_db$Word, word_db$KlatteseSyll, word_db$Zipf.value)
   
@@ -53,11 +64,8 @@ server <- function(input, output) {
       this_word_info <- retrieveDBInfo(vals, vals$wbw_english[word], tibbletest)
       vals$all_word_info <- append(vals$all_word_info, this_word_info)
     }
-    print("retrieve Db Info success")
     vals$word_by_word <- updateWordByWord(vals)  # perform word by word calculations and store in wbw df
-    print("update word by word success")
     vals$avg_data <- updateAverage(vals)  # perform average calculations and store in average df
-    print("update average data success")
   })
 
   # display the word by word output
