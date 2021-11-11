@@ -7,10 +7,9 @@ library(stringr)
 source("functions.R")
 
 ui <- fluidPage(
-  tags$link(rel = "stylesheet", type = "text/css", href = "style.css"),
   
   navbarPage(
-    "UNC Center for Aphasia and Related Disorders"
+    tags$a(href="https://www.med.unc.edu/ahs/sphs/card/", "UNC Center for Aphasia and Related Disorders")
   ),
   
   # App title 
@@ -25,7 +24,8 @@ ui <- fluidPage(
              tags$ul(
                tags$li("Your input may be separated by space or newline characters."), 
                tags$li("Possessive 's may cause an input not to be recognized, be sure to remove these characters."), 
-               tags$li("This app does not save data between calculations. Be sure to use the download buttons if you need to save your data."), 
+               tags$li("This app does not save data between calculations. Be sure to use the download buttons if you need to save your data."),
+               tags$li("Recommended to open downloaded files in a text editor other than Excel, which can't read the Klattese stress marker."),
                tags$li("For more information on WCM, Zipf Frequency, and our database, refer to our GitHub.")
              ))
   ),
@@ -35,16 +35,12 @@ ui <- fluidPage(
     DT::dataTableOutput("word_by_word", "auto", "auto"), 
     downloadButton("downloadWBW", "Download"), 
     HTML("<hr>"),
-    DT::dataTableOutput("average", "auto", "auto"), 
-    downloadButton("downloadAVG", "Download")
+    DT::dataTableOutput("average", "auto", "auto"),
+    downloadButton("downloadAVG", "Download"),
   )
 )
 
 server <- function(input, output) {
-  
-  # shinyjs::hide("downloadWBW")
-  # shinyjs::hide("downloadAVG")
-  
   word_db <- read.csv('UNCWordDB-2021-10-08.csv', na.strings=c("", "NA"))
   tibbletest <- tibble(word_db$Word, word_db$KlatteseSyll, word_db$Zipf.value)
   
@@ -58,7 +54,7 @@ server <- function(input, output) {
     # initialize reactive values
     vals$wbw_english <- c()  # clear previous inputs before adding new 
     vals$all_word_info <- c()  # vector where we will track all info for all words
-    vals$phon_total <- vals$wf_total <- 0 
+    vals$phon_total <- vals$wf_total <- vals$no_data_found <- 0 
     vals$wbw_row <- 1  # keep track of which row of word by word output we are on
     # clean data and perform calculations 
     sample <- gsub('[[:punct:] ]+',' ',tolower(input$sample))  # strip punctuation and use lowercase
@@ -74,37 +70,65 @@ server <- function(input, output) {
     }
     vals$word_by_word <- updateWordByWord(vals)  # perform word by word calculations and store in wbw df
     vals$avg_data <- updateAverage(vals)  # perform average calculations and store in average df
+    
+    
+    if(vals$no_data_found == 0) {
+      # display the word by word output
+      output$word_by_word <- renderDataTable(
+        vals$word_by_word, caption = "Word by Word",
+        server = TRUE
+      )
+      
+      # display the average output
+      output$average <- renderDataTable (
+        vals$avg_data, caption = "Average",
+        server = TRUE
+      )
+      
+      output$downloadWBW <- downloadHandler(
+        filename = function() {
+          "word_by_word.csv"
+        },
+        content = function(file) {
+          write.csv(vals$word_by_word, file)
+        }
+      )
+      
+      output$downloadAVG <- downloadHandler(
+        filename = function() {
+          "avg_data.csv"
+        },
+        content = function(file) {
+          write.csv(vals$avg_data, file)
+        }
+      )
+    } else {
+      return(div(style = "height:30vh;", tags$h4("No table yet or whatever")))
+    }
   })
 
-  # display the word by word output
-  output$word_by_word <- renderDataTable(
-    vals$word_by_word, caption = "Word by Word",
-    server = TRUE
-  )
 
-  # display the average output
-  output$average <- renderDataTable (
-      vals$avg_data, caption = "Average",
-      server = TRUE
-  )
   
-  output$downloadWBW <- downloadHandler(
-    filename = function() {
-      "word_by_word.csv"
-    },
-    content = function(file) {
-      write.csv(vals$word_by_word, file)
-    }
-  )
   
-  output$downloadAVG <- downloadHandler(
-    filename = function() {
-      "avg_data.csv"
-    },
-    content = function(file) {
-      write.csv(vals$avg_data, file)
-    }
-  )
+  # output$word_by_word <- renderDataTable(
+  #   datatable(
+  #     vals$word_by_word, 
+  #     caption = "Word by Word", 
+  #     extensions = "Buttons", 
+  #     options = list(
+  #       paging = TRUE,
+  #       searching = TRUE,
+  #       fixedColumns = TRUE,
+  #       autoWidth = TRUE,
+  #       ordering = TRUE,
+  #       dom = 'tB',
+  #       buttons = c('download')
+  #     ), 
+  #     class = "display"
+  #   )
+  # )
+
+  
   
 }
 

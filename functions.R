@@ -67,6 +67,10 @@ updateWordByWord <- function(vals) {
     WCM_Score=NA,
     Zipf_Word_Frequency=NA
   )
+  if(length(vals$all_word_info) == 0) {
+    vals$no_data_found = 1
+    return(data.frame("No data to display"))
+  }
   for(word in 1:((length(vals$all_word_info))/3)) {
     phon_points <- calculateWCM(vals$all_word_info[[(word*3)-1]])  # calculate WCM using Klattese of this word
     # store results in word by word df 
