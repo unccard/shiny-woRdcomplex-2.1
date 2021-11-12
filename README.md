@@ -1,7 +1,7 @@
 # woRdcomplex-2.1-shiny
 Shiny app for [woRdcomplex version 2.1](https://github.com/unccard/woRdcomplex-2.1)
 
-Run the Shiny by downloading the repository and running it locally, or via [shiny io]()
+Run the Shiny by downloading the repository and running it locally, or via [shiny io](https://unccard.shinyapps.io/shiny-woRdcomplex-2/)
 
 Also of interest is this [Shiny app]() to compare the complexity of target words compared to actual productions. 
 
