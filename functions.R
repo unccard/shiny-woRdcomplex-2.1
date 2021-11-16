@@ -59,6 +59,26 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
   return(this_word_info)
 }
 
+rescueContraction <- function(vals, this_word_info, index) {
+  isVoiced <- 1
+  engl_voiceless_cons <- c("C","f","h","k","p","s","S","t","T")
+  base <- this_word_info[2]  # base in klattese
+  contraction <- vals$wbw_english[index+1]  # english orthography contraction
+  final_phoneme <- substr(base, str_length(base), str_length(base))  # last sound in base
+  if(final_phoneme %in% engl_voiceless_cons) isVoiced <- 0
+  # add the correct pronunciation of the contraction to the klattese
+  if(contraction == "s") {
+    if(isVoiced == 1) base <- paste(base, "z", sep="")
+    else base <- paste(base, "s", sep = "")
+  } else if(contraction == "d") {
+    if(isVoiced == 1) base <- paste(base, "d", sep="d")
+    else base <- paste(base, "t", sep="")
+  } else if(contraction == "ve") base <- paste(base, "v", sep="")
+  else base <- paste(base, "L", sep="")  # else contraction is "ll"
+  this_word_info[2] = base
+  return(this_word_info)
+}
+
 # This function concatenates all the data for each word in the data frame 
 updateWordByWord <- function(vals) {
   vals$word_by_word <- data.frame(
@@ -95,7 +115,8 @@ updateAverage <- function(vals) {
     Avg_WCM_Score=NA,
     Avg_Zipf_WF_Score=NA
   )
-  vals$avg_data[1,1] = length(vals$wbw_english)  # Total number of words in the input
+  total_words <- vals$wbw_english[! vals$wbw_english %in% c("s", "d", "ve", "ll")]  # remove contracted bits 
+  vals$avg_data[1,1] = length(total_words)  # Total number of words in the input
   vals$avg_data[1,2] = nrow(vals$word_by_word)  # Total number of words found in the database
   vals$avg_data[1,3] = round(vals$phon_total/nrow(vals$word_by_word), 3)  # Average WCM score 
   vals$avg_data[1,4] = round(as.double(vals$wf_total)/nrow(vals$word_by_word), 3)  # Average word frequency 

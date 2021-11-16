@@ -23,7 +23,6 @@ ui <- fluidPage(
     fluidRow("Notes:", 
              tags$ul(
                tags$li("Your input may be separated by space or newline characters."), 
-               tags$li("Possessive 's may cause an input not to be recognized, be sure to remove these characters."), 
                tags$li("This app does not save data between calculations. Be sure to use the download buttons if you need to save your data."),
                tags$li("Recommended to open downloaded files in a text editor other than Excel, which can't read the Klattese stress marker."),
                tags$li("For more information on WCM, Zipf Frequency, and our database, refer to our GitHub.")
@@ -54,7 +53,7 @@ server <- function(input, output) {
     # initialize reactive values
     vals$wbw_english <- c()  # clear previous inputs before adding new 
     vals$all_word_info <- c()  # vector where we will track all info for all words
-    vals$phon_total <- vals$wf_total <- vals$no_data_found <- 0 
+    vals$phon_total <- vals$wf_total <- vals$no_data_found <- vals$isContraction <- 0 
     vals$wbw_row <- 1  # keep track of which row of word by word output we are on
     # clean data and perform calculations 
     sample <- gsub('[[:punct:] ]+',' ',tolower(input$sample))  # strip punctuation and use lowercase
@@ -65,8 +64,18 @@ server <- function(input, output) {
     }
     vals$wbw_english <- sample_clean  # store in reactive values 
     for(word in 1:length(vals$wbw_english)) {  # loop through input to gather info on each word
+      if(vals$isContraction == 1) {  # if this is a contracted bit 
+        vals$isContraction = 0  # reset the flag 
+        next  # skip the contraction 
+      }
       this_word_info <- retrieveDBInfo(vals, vals$wbw_english[word], tibbletest)
+      if(word <= length(vals$wbw_english)-1) {  # if there is a next element 
+        if(vals$wbw_english[word+1] %in% c("s", "d", "ve", "ll")) {  # if the element is a contraction 
+          this_word_info <- rescueContraction(vals, this_word_info, word)
+        }
+      }
       vals$all_word_info <- append(vals$all_word_info, this_word_info)
+      # remove the contracted letter from vals$wbw_english 
     }
     vals$word_by_word <- updateWordByWord(vals)  # perform word by word calculations and store in wbw df
     vals$avg_data <- updateAverage(vals)  # perform average calculations and store in average df
@@ -103,7 +112,7 @@ server <- function(input, output) {
         }
       )
     } else {
-      return(div(style = "height:30vh;", tags$h4("No table yet or whatever")))
+      output$word_by_word <- renderText("No table to display")
     }
   })
 
