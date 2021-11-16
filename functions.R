@@ -74,7 +74,7 @@ rescueContraction <- function(vals, this_word_info, index) {
     else base <- paste(base, "s", sep = "")
   } else if(contraction == "d") {
     engl <- paste(engl, "'d", sep="")
-    if(isVoiced == 1) base <- paste(base, "d", sep="d")
+    if(isVoiced == 1) base <- paste(base, "d", sep="")
     else base <- paste(base, "t", sep="")
   } else if(contraction == "ve") {
     engl <- paste(engl, "'ve", sep="")
@@ -84,6 +84,7 @@ rescueContraction <- function(vals, this_word_info, index) {
     engl <- paste(engl, "'ll", sep="")
     base <- paste(base, "L", sep="")  
   }
+  this_word_info[1] = engl
   this_word_info[2] = base
   return(this_word_info)
 }
