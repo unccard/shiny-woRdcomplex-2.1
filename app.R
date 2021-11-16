@@ -71,6 +71,7 @@ server <- function(input, output) {
       this_word_info <- retrieveDBInfo(vals, vals$wbw_english[word], tibbletest)
       if(word <= length(vals$wbw_english)-1) {  # if there is a next element 
         if(vals$wbw_english[word+1] %in% c("s", "d", "ve", "ll")) {  # if the element is a contraction 
+          vals$isContraction = 1
           this_word_info <- rescueContraction(vals, this_word_info, word)
         }
       }

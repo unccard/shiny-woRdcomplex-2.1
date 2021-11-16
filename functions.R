@@ -62,19 +62,28 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
 rescueContraction <- function(vals, this_word_info, index) {
   isVoiced <- 1
   engl_voiceless_cons <- c("C","f","h","k","p","s","S","t","T")
+  engl <- this_word_info[1]
   base <- this_word_info[2]  # base in klattese
   contraction <- vals$wbw_english[index+1]  # english orthography contraction
   final_phoneme <- substr(base, str_length(base), str_length(base))  # last sound in base
   if(final_phoneme %in% engl_voiceless_cons) isVoiced <- 0
-  # add the correct pronunciation of the contraction to the klattese
+  # add the correct pronunciation of the contraction to the klattese, and format english 
   if(contraction == "s") {
+    engl <- paste(engl, "'s", sep="")
     if(isVoiced == 1) base <- paste(base, "z", sep="")
     else base <- paste(base, "s", sep = "")
   } else if(contraction == "d") {
+    engl <- paste(engl, "'d", sep="")
     if(isVoiced == 1) base <- paste(base, "d", sep="d")
     else base <- paste(base, "t", sep="")
-  } else if(contraction == "ve") base <- paste(base, "v", sep="")
-  else base <- paste(base, "L", sep="")  # else contraction is "ll"
+  } else if(contraction == "ve") {
+    engl <- paste(engl, "'ve", sep="")
+    base <- paste(base, "v", sep="")
+  }
+  else {  # contraction is "ll"
+    engl <- paste(engl, "'ll", sep="")
+    base <- paste(base, "L", sep="")  
+  }
   this_word_info[2] = base
   return(this_word_info)
 }
