@@ -56,6 +56,7 @@ server <- function(input, output) {
     vals$wbw_english <- c()  # clear previous inputs before adding new 
     vals$all_word_info <- c()  # vector where we will track all info for all words
     vals$phon_total <- vals$wf_total <-  vals$is_contraction <- vals$words_in_db <- 0
+    print(vals$wf_total)
     vals$has_data <- vals$wbw_row <- 1
     sample <- gsub('[[:punct:] ]+',' ',tolower(input$sample))  # strip punctuation and use lowercase
     english <- strsplit(sample, "[ ?\r?\n]") # split reactive input on any space or newline
