@@ -21,11 +21,13 @@ ui <- fluidPage(
     actionButton("submit", "Calculate WCM"), 
     HTML("<hr>"),
     fluidRow("Notes:", 
-             tags$ul(
-               tags$li("Your input may be separated by space or newline characters."), 
-               tags$li("This app does not save data between calculations. Be sure to use the download buttons if you need to save your data."),
-               tags$li("Recommended to open downloaded files in a text editor other than Excel, which can't read the Klattese stress marker."),
-               tags$li("For more information on WCM, Zipf Frequency, and our database, refer to our GitHub.")
+             HTML(
+               "<ul>
+                 <li>Your input may be separated by space or newline characters.</li>
+                 <li>This app does not save data between calculations. Be sure to use the download buttons if you need to save your data.</li>
+                 <li>Recommended to open downloaded files in a text editor other than Excel, which can't read the Klattese stress marker.</li>
+                 <li>For more information on WCM, Zipf Frequency, and our database, refer to our <a href=\"https://github.com/unccard\">GitHub</a>.</li>
+               </ul>"
              ))
   ),
   
@@ -53,36 +55,39 @@ server <- function(input, output) {
     # initialize reactive values
     vals$wbw_english <- c()  # clear previous inputs before adding new 
     vals$all_word_info <- c()  # vector where we will track all info for all words
-    vals$phon_total <- vals$wf_total <- vals$no_data_found <- vals$isContraction <- 0 
-    vals$wbw_row <- 1  # keep track of which row of word by word output we are on
-    # clean data and perform calculations 
+    vals$phon_total <- vals$wf_total <-  vals$is_contraction <- vals$words_in_db <- 0
+    vals$has_data <- vals$wbw_row <- 1
     sample <- gsub('[[:punct:] ]+',' ',tolower(input$sample))  # strip punctuation and use lowercase
     english <- strsplit(sample, "[ ?\r?\n]") # split reactive input on any space or newline
     sample_clean <- c()
     for(word in 1:length(english[[1]])) {  # remove empty values from sample 
       if(english[[1]][word] != "") sample_clean <- append(sample_clean, english[[1]][word])
     }
-    vals$wbw_english <- sample_clean  # store in reactive values 
+    vals$wbw_english <- sample_clean # store in reactive values 
     for(word in 1:length(vals$wbw_english)) {  # loop through input to gather info on each word
-      if(vals$isContraction == 1) {  # if this is a contracted bit 
-        vals$isContraction = 0  # reset the flag 
+      if(vals$is_contraction == 1) {  # if this is a contracted bit 
+        vals$is_contraction = 0  # reset the flag 
         next  # skip the contraction 
       }
       this_word_info <- retrieveDBInfo(vals, vals$wbw_english[word], tibbletest)
+      print(vals$wbw_english[word])
+      # if(length(this_word_info) < 3) {  # if the word has no entry in the database
+      #   # word not found do stuff
+      # }
       if(word <= length(vals$wbw_english)-1) {  # if there is a next element 
         if(vals$wbw_english[word+1] %in% c("s", "d", "ve", "ll")) {  # if the element is a contraction 
-          vals$isContraction = 1
+          vals$is_contraction = 1
           this_word_info <- rescueContraction(vals, this_word_info, word)
         }
       }
       vals$all_word_info <- append(vals$all_word_info, this_word_info)
-      # remove the contracted letter from vals$wbw_english 
     }
+    # pass in flag
     vals$word_by_word <- updateWordByWord(vals)  # perform word by word calculations and store in wbw df
     vals$avg_data <- updateAverage(vals)  # perform average calculations and store in average df
     
     
-    if(vals$no_data_found == 0) {
+    if(nrow(vals$word_by_word) > 0) {
       # display the word by word output
       output$word_by_word <- renderDataTable(
         vals$word_by_word, caption = "Word by Word",
@@ -116,29 +121,6 @@ server <- function(input, output) {
       output$word_by_word <- renderText("No table to display")
     }
   })
-
-
-  
-  
-  # output$word_by_word <- renderDataTable(
-  #   datatable(
-  #     vals$word_by_word, 
-  #     caption = "Word by Word", 
-  #     extensions = "Buttons", 
-  #     options = list(
-  #       paging = TRUE,
-  #       searching = TRUE,
-  #       fixedColumns = TRUE,
-  #       autoWidth = TRUE,
-  #       ordering = TRUE,
-  #       dom = 'tB',
-  #       buttons = c('download')
-  #     ), 
-  #     class = "display"
-  #   )
-  # )
-
-  
   
 }
 

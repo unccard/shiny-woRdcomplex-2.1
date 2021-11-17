@@ -50,11 +50,17 @@ calculateWCM <- function(klattese) {
 retrieveDBInfo <- function(vals, word, tibbletest) {
   this_word_info <- c()  # contains info for the current word 
   row <- as.integer(which(tibbletest[,1] == word))
-  # if(length(row) == 0)  # if word not found in db, handle error 
+  print(row)
+  if(length(row) == 0) { # if word not found in db, handle error 
+    this_word_info <- append(this_word_info, word)  # first element is English word
+    this_word_info <- append(this_word_info, NA)  # Klattese is not found
+    this_word_info <- append(this_word_info, NA)  # Zipf val is not found 
+  }
   if(isTruthy(!identical(toString(tibbletest[row, 2]),"character(0)"))) {  # omit words not found in word_db
     this_word_info <- append(this_word_info, toString(tibbletest[row, 1]))  # first element is English word
     this_word_info <- append(this_word_info, toString(tibbletest[row, 2]))  # second element is Klattese
     this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is word frequency
+    vals$words_in_db = vals$words_in_db + 1
   }
   return(this_word_info)
 }
@@ -86,6 +92,7 @@ rescueContraction <- function(vals, this_word_info, index) {
   }
   this_word_info[1] = engl
   this_word_info[2] = base
+  print(base)
   return(this_word_info)
 }
 
@@ -97,22 +104,32 @@ updateWordByWord <- function(vals) {
     WCM_Score=NA,
     Zipf_Word_Frequency=NA
   )
-  if(length(vals$all_word_info) == 0) {
-    vals$no_data_found = 1
-    return(data.frame("No data to display"))
-  }
+  # if(length(vals$all_word_info) == 0) {
+  #   vals$no_data_found = 1
+  #   return(data.frame("No data to display"))
+  # }
+  print(vals$all_word_info)
   for(word in 1:((length(vals$all_word_info))/3)) {
-    phon_points <- calculateWCM(vals$all_word_info[[(word*3)-1]])  # calculate WCM using Klattese of this word
+    english <- vals$all_word_info[[(word*3)-2]]
+    klattese <- vals$all_word_info[[(word*3)-1]]
+    wf <- as.double(vals$all_word_info[[word*3]])
+    phon_points <- 0
     # store results in word by word df 
-    vals$word_by_word[vals$wbw_row, 1] = vals$all_word_info[[(word*3)-2]]  # English orthography of this word 
-    vals$word_by_word[vals$wbw_row, 2] = vals$all_word_info[[(word*3)-1]]  # Klattese of this word 
-    vals$word_by_word[vals$wbw_row, 3] = phon_points  # WCM score of this word
-    vals$word_by_word[vals$wbw_row, 4] = round(as.double(vals$all_word_info[[word*3]]), 3)  # word frequency of this word
+    vals$word_by_word[vals$wbw_row, 1] = english  
+    vals$word_by_word[vals$wbw_row, 2] = klattese  
+    if(is.na(klattese)) {
+      vals$word_by_word[vals$wbw_row, 3] = NA  # WCM is unknown
+      vals$word_by_word[vals$wbw_row, 4] = NA  # Zipf val is unknown
+    } else {
+      phon_points = calculateWCM(klattese)  # calculate WCM using Klattese of this word
+      vals$word_by_word[vals$wbw_row, 3] = phon_points  # WCM score of this word
+      vals$word_by_word[vals$wbw_row, 4] = round(wf, 3)  # word frequency of this word
+    }
     # move to next row in the word by word data frame
     vals$wbw_row = vals$wbw_row + 1  
     # add data for this word to cumulative total 
     vals$phon_total <- vals$phon_total + phon_points
-    vals$wf_total <- as.double(vals$wf_total) + as.double(vals$word_by_word[word, 4])
+    vals$wf_total <- vals$wf_total + wf
   }
   return(vals$word_by_word)
 }
@@ -125,11 +142,11 @@ updateAverage <- function(vals) {
     Avg_WCM_Score=NA,
     Avg_Zipf_WF_Score=NA
   )
-  total_words <- vals$wbw_english[! vals$wbw_english %in% c("s", "d", "ve", "ll")]  # remove contracted bits 
-  vals$avg_data[1,1] = length(total_words)  # Total number of words in the input
-  vals$avg_data[1,2] = nrow(vals$word_by_word)  # Total number of words found in the database
-  vals$avg_data[1,3] = round(vals$phon_total/nrow(vals$word_by_word), 3)  # Average WCM score 
-  vals$avg_data[1,4] = round(as.double(vals$wf_total)/nrow(vals$word_by_word), 3)  # Average word frequency 
+  total_words_in_tscript <- vals$wbw_english[! vals$wbw_english %in% c("s", "d", "ve", "ll")]  # remove contracted bits
+  vals$avg_data[1,1] = length(total_words_in_tscript)  # Total number of words in the input
+  vals$avg_data[1,2] = vals$words_in_db  # Total number of words found in the database
+  vals$avg_data[1,3] = round(vals$phon_total/vals$words_in_db, 3)  # Average WCM score 
+  vals$avg_data[1,4] = round(vals$wf_total/vals$words_in_db, 3)  # Average word frequency 
   return(vals$avg_data)
 }
 
