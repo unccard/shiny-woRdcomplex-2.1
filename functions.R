@@ -93,19 +93,18 @@ rescueContraction <- function(vals, this_word_info, index) {
   # add the correct pronunciation of the contraction to the klattese, and format english 
   if(contraction == "s") {
     engl <- paste(engl, "'s", sep="")
-    if(isVoiced == 1) base <- paste(base, "z", sep="")
-    else base <- paste(base, "s", sep = "")
+    if(isVoiced == 1 && !(is.na(base))) base <- paste(base, "z", sep="")
+    else if(!is.na(base)) base <- paste(base, "s", sep = "")
   } else if(contraction == "d") {
     engl <- paste(engl, "'d", sep="")
-    if(isVoiced == 1) base <- paste(base, "d", sep="")
-    else base <- paste(base, "t", sep="")
+    if(!(is.na(base))) base <- paste(base, "d", sep="")
   } else if(contraction == "ve") {
     engl <- paste(engl, "'ve", sep="")
-    base <- paste(base, "v", sep="")
+    if(!(is.na(base))) base <- paste(base, "v", sep="")
   }
   else {  # contraction is "ll"
     engl <- paste(engl, "'ll", sep="")
-    base <- paste(base, "L", sep="")  
+    if(!(is.na(base))) base <- paste(base, "L", sep="")  
   }
   this_word_info[1] = engl
   this_word_info[2] = base
