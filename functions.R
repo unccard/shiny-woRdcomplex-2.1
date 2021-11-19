@@ -111,6 +111,14 @@ rescueContraction <- function(vals, this_word_info, index) {
   return(this_word_info)
 }
 
+calculateDenominator <- function(vals, col) {
+  denom <- 0
+  for(val in 1:length(col)) {
+    if(!(col[val] == "NA")) denom = denom + 1
+  }
+  return(denom)
+}
+
 # This function concatenates all the data for each word in the data frame 
 updateWordByWord <- function(vals) {
   vals$word_by_word <- data.frame(
@@ -158,13 +166,14 @@ updateAverage <- function(vals) {
   total_words_in_tscript <- vals$wbw_english[! vals$wbw_english %in% c("s", "d", "ve", "ll")]  # remove contracted bits
   vals$avg_data[1,1] = toString(length(total_words_in_tscript))  # Total number of words in the input
   vals$avg_data[1,2] = toString(vals$words_in_db)  # Total number of words found in the database
-  if(vals$words_in_db == 0) {  # if no data just display 0
+  if(vals$words_in_db == 0) {  # if no data just display NA
     vals$avg_data[1,3] = "NA"
     vals$avg_data[1,4] = "NA"
   } else {
-    phon_denominator <- sum(!is.na(vals$word_by_word$WCM_Score))  # total word frequency scores
+    phon_denom <- calculateDenominator(vals, vals$word_by_word$WCM_Score)
+    wf_denom <- calculateDenominator(vals, vals$word_by_word$Zipf_Word_Frequency)
     vals$avg_data[1,3] = toString(round(vals$phon_total/phon_denominator, 3))  # Average WCM score 
-    vals$avg_data[1,4] = toString(round(vals$wf_total/vals$words_in_db, 3))  # Average word frequency 
+    vals$avg_data[1,4] = toString(round(vals$wf_total/wf_denom, 3))  # Average word frequency 
   }
   return(vals$avg_data)
 }

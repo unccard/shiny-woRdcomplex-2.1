@@ -18,7 +18,7 @@ ui <- fluidPage(
   # Sidebar panel with inputs 
   sidebarPanel(
     textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%"), 
-    textAreaInput("specifyKlattese", "English,Klattese:", placeholder="Write comma-separated English,Klattese pairs, with a newline or space between pairs", height="100px"),
+    textAreaInput("specifyKlattese", "Enter alternate/not found in DB transcriptions:", value = "eldridge,EldrIJ\ntejada,tehadx", placeholder="Write comma-separated English,Klattese pairs, with a newline or space between pairs", height="100px"),
     actionButton("submit", "Calculate WCM"), 
     HTML("<hr>"),
     fluidRow("Notes:", 
