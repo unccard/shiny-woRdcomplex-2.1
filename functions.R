@@ -163,7 +163,9 @@ updateAverage <- function(vals) {
     vals$avg_data[1,3] = "NA"
     vals$avg_data[1,4] = "NA"
   } else {
-    vals$avg_data[1,3] = toString(round(vals$phon_total/vals$words_in_db, 3))  # Average WCM score 
+    phon_denominator <- sum(!is.na(vals$word_by_word$WCM_Score))  # total word frequency scores
+    print(phon_denominator)
+    vals$avg_data[1,3] = toString(round(vals$phon_total/phon_denominator, 3))  # Average WCM score 
     vals$avg_data[1,4] = toString(round(vals$wf_total/vals$words_in_db, 3))  # Average word frequency 
   }
   return(vals$avg_data)
