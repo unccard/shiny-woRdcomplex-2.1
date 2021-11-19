@@ -60,7 +60,7 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
   this_word_info <- c()  # vector to contain info for the current word 
   this_word_info <- append(this_word_info, word)  # first element is English word
   row <- as.integer(which(tibbletest[,1] == word))
-  if(word %in% vals$substitutions) {  # word has a special klattese input 
+  if(length(vals$substitutions) > 0 && word %in% vals$substitutions) {  # word has a special klattese input 
     index <- which(vals$substitutions == word)
     this_word_info <- append(this_word_info, vals$substitutions[index+1])
     if(length(row) > 0) { # if word is also in db, use Zipf val 

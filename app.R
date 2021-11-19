@@ -72,8 +72,10 @@ server <- function(input, output) {
       if(english[[1]][word] != "") sample_clean <- append(sample_clean, english[[1]][word])
     }
     vals$wbw_english <- sample_clean # store in reactive values 
-    special_klattese <- strsplit(input$specifyKlattese, "[ ?\r?\n]")  # break up the special klattese inputs
-    vals$substitutions <- processSpecialInput(vals, special_klattese)  # parse the english and klattese pairs
+    if(isTruthy(input$specifyKlattese)) {
+      special_klattese <- strsplit(input$specifyKlattese, "[ ?\r?\n]")  # break up the special klattese inputs
+      vals$substitutions <- processSpecialInput(vals, special_klattese)  # parse the english and klattese pairs
+    }
 
     # loop through input to gather info on each word
     for(word in 1:length(vals$wbw_english)) {  
