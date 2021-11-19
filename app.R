@@ -40,7 +40,9 @@ ui <- fluidPage(
     HTML("<hr>"),
     DT::dataTableOutput("average", "auto", "auto"),
     downloadButton("downloadAVG", "Download"),
-  )
+  ), 
+  
+  title = "Word Complexity Measure"
 )
 
 server <- function(input, output) {
