@@ -172,7 +172,7 @@ updateAverage <- function(vals) {
   } else {
     phon_denom <- calculateDenominator(vals, vals$word_by_word$WCM_Score)
     wf_denom <- calculateDenominator(vals, vals$word_by_word$Zipf_Word_Frequency)
-    vals$avg_data[1,3] = toString(round(vals$phon_total/phon_denominator, 3))  # Average WCM score 
+    vals$avg_data[1,3] = toString(round(vals$phon_total/phon_denom, 3))  # Average WCM score 
     vals$avg_data[1,4] = toString(round(vals$wf_total/wf_denom, 3))  # Average word frequency 
   }
   return(vals$avg_data)
