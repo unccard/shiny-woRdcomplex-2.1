@@ -18,12 +18,14 @@ ui <- fluidPage(
   # Sidebar panel with inputs 
   sidebarPanel(
     textAreaInput("sample", "Transcript:", placeholder="Paste English orthography transcript here...", height = '250px', width = "100%"), 
+    textAreaInput("specifyKlattese", "English,Klattese:", placeholder="Write comma-separated English,Klattese pairs, with a newline or space between pairs", height="100px"),
     actionButton("submit", "Calculate WCM"), 
     HTML("<hr>"),
     fluidRow("Notes:", 
              HTML(
                "<ul>
                  <li>Your input may be separated by space or newline characters.</li>
+                 <li>Use the English,Klattese input for pairs that may not be in the database or that you want to write a specific pronunciation for.</li>
                  <li>This app does not save data between calculations. Be sure to use the download buttons if you need to save your data.</li>
                  <li>Recommended to open downloaded files in a text editor other than Excel, which can't read the Klattese stress marker.</li>
                  <li>For more information on WCM, Zipf Frequency, and our database, refer to our <a href=\"https://github.com/unccard\">GitHub</a>.</li>
@@ -52,12 +54,15 @@ server <- function(input, output) {
   # When the submit button is clicked... 
   observeEvent(input$submit,{
     req(input$sample)  # verify input is not empty
+    
     # initialize reactive values
     vals$wbw_english <- c()  # clear previous inputs before adding new 
     vals$all_word_info <- c()  # vector where we will track all info for all words
+    vals$substitutions <- c()  # vector to store any special klattese inputs 
     vals$phon_total <- vals$wf_total <-  vals$is_contraction <- vals$words_in_db <- 0
-    print(vals$wf_total)
     vals$has_data <- vals$wbw_row <- 1
+    
+    # process and clean the inputs
     sample <- gsub('[[:punct:] ]+',' ',tolower(input$sample))  # strip punctuation and use lowercase
     english <- strsplit(sample, "[ ?\r?\n]") # split reactive input on any space or newline
     sample_clean <- c()
@@ -65,16 +70,16 @@ server <- function(input, output) {
       if(english[[1]][word] != "") sample_clean <- append(sample_clean, english[[1]][word])
     }
     vals$wbw_english <- sample_clean # store in reactive values 
-    for(word in 1:length(vals$wbw_english)) {  # loop through input to gather info on each word
+    special_klattese <- strsplit(input$specifyKlattese, "[ ?\r?\n]")  # break up the special klattese inputs
+    vals$substitutions <- processSpecialInput(vals, special_klattese)  # parse the english and klattese pairs
+
+    # loop through input to gather info on each word
+    for(word in 1:length(vals$wbw_english)) {  
       if(vals$is_contraction == 1) {  # if this is a contracted bit 
         vals$is_contraction = 0  # reset the flag 
         next  # skip the contraction 
       }
       this_word_info <- retrieveDBInfo(vals, vals$wbw_english[word], tibbletest)
-      print(vals$wbw_english[word])
-      # if(length(this_word_info) < 3) {  # if the word has no entry in the database
-      #   # word not found do stuff
-      # }
       if(word <= length(vals$wbw_english)-1) {  # if there is a next element 
         if(vals$wbw_english[word+1] %in% c("s", "d", "ve", "ll")) {  # if the element is a contraction 
           vals$is_contraction = 1
@@ -83,10 +88,10 @@ server <- function(input, output) {
       }
       vals$all_word_info <- append(vals$all_word_info, this_word_info)
     }
-    # pass in flag
+    
+    # set up database outputs 
     vals$word_by_word <- updateWordByWord(vals)  # perform word by word calculations and store in wbw df
     vals$avg_data <- updateAverage(vals)  # perform average calculations and store in average df
-    
     
     if(nrow(vals$word_by_word) > 0) {
       # display the word by word output

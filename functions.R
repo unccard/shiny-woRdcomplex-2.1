@@ -46,20 +46,38 @@ calculateWCM <- function(klattese) {
   return(phon_points) 
 }
 
+processSpecialInput <- function(vals, substitutions) {
+  for(word in 1:length(substitutions[[1]])) {
+    pair <- strsplit(substitutions[[1]][word], ",")
+    vals$substitutions <- append(vals$substitutions, pair[[1]][1])
+    vals$substitutions <- append(vals$substitutions, pair[[1]][2])
+  }
+  return(vals$substitutions)
+}
+
 # This function verifies that the English orthography is in the database and retrieves its Klattese and wf values 
 retrieveDBInfo <- function(vals, word, tibbletest) {
-  this_word_info <- c()  # contains info for the current word 
+  this_word_info <- c()  # vector to contain info for the current word 
+  this_word_info <- append(this_word_info, word)  # first element is English word
   row <- as.integer(which(tibbletest[,1] == word))
-  if(length(row) == 0) { # if word not found in db, handle error 
-    this_word_info <- append(this_word_info, word)  # first element is English word
-    this_word_info <- append(this_word_info, NA)  # Klattese is not found
-    this_word_info <- append(this_word_info, NA)  # Zipf val is not found 
-  }
-  if(isTruthy(!identical(toString(tibbletest[row, 2]),"character(0)"))) {  # omit words not found in word_db
-    this_word_info <- append(this_word_info, toString(tibbletest[row, 1]))  # first element is English word
-    this_word_info <- append(this_word_info, toString(tibbletest[row, 2]))  # second element is Klattese
-    this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is word frequency
-    vals$words_in_db = vals$words_in_db + 1
+  if(word %in% vals$substitutions) {  # word has a special klattese input 
+    index <- which(vals$substitutions == word)
+    this_word_info <- append(this_word_info, vals$substitutions[index+1])
+    if(length(row) > 0) { # if word is also in db, use Zipf val 
+      this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is word frequency
+      vals$words_in_db = vals$words_in_db + 1
+    } else {
+      this_word_info <- append(this_word_info, NA)  # Zipf val is not found 
+    }
+  } else {  # word does not have special klattese input 
+    if(length(row) > 0) {  # if word is in db 
+      this_word_info <- append(this_word_info, toString(tibbletest[row, 2]))  # second element is Klattese
+      this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is word frequency
+      vals$words_in_db = vals$words_in_db + 1
+    } else {  # word is not in db 
+      this_word_info <- append(this_word_info, NA)  # Klattese is not found
+      this_word_info <- append(this_word_info, NA)  # Zipf val is not found 
+    }
   }
   return(this_word_info)
 }
@@ -102,16 +120,10 @@ updateWordByWord <- function(vals) {
     WCM_Score=NA,
     Zipf_Word_Frequency=NA
   )
-  # if(length(vals$all_word_info) == 0) {
-  #   vals$no_data_found = 1
-  #   return(data.frame("No data to display"))
-  # }
-  print(vals$all_word_info)
   for(word in 1:((length(vals$all_word_info))/3)) {
     english <- vals$all_word_info[[(word*3)-2]]
     klattese <- vals$all_word_info[[(word*3)-1]]
     wf <- as.double(vals$all_word_info[[word*3]])
-    if(is.na(wf)) wf <- 0
     phon_points <- 0
     # store results in word by word df 
     vals$word_by_word[vals$wbw_row, 1] = english  
@@ -122,14 +134,16 @@ updateWordByWord <- function(vals) {
     } else {
       vals$word_by_word[vals$wbw_row, 2] = klattese  
       phon_points = calculateWCM(klattese)  # calculate WCM using Klattese of this word
-      vals$word_by_word[vals$wbw_row, 3] = phon_points  # WCM score of this word
-      vals$word_by_word[vals$wbw_row, 4] = round(wf, 3)  # word frequency of this word
+      vals$word_by_word[vals$wbw_row, 3] = toString(phon_points)  # WCM score of this word
+      if(is.na(wf)) {
+        vals$word_by_word[vals$wbw_row, 4] = "NA"  # Zipf val is unknown
+      } else vals$word_by_word[vals$wbw_row, 4] = toString(round(wf, 3))  # word frequency of this word
     }
     # move to next row in the word by word data frame
     vals$wbw_row = vals$wbw_row + 1  
     # add data for this word to cumulative total 
     vals$phon_total = vals$phon_total + phon_points
-    vals$wf_total = vals$wf_total + wf
+    if(!is.na(wf)) vals$wf_total = vals$wf_total + wf
   }
   return(vals$word_by_word)
 }
