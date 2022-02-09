@@ -59,6 +59,18 @@ processSpecialInput <- function(vals, substitutions) {
 retrieveDBInfo <- function(vals, word, tibbletest) {
   this_word_info <- c()  # vector to contain info for the current word 
   this_word_info <- append(this_word_info, word)  # first element is English word
+  is_nt_contraction <- 0
+  
+  print(word)
+  
+  # Look for and handle the special case contractions 
+  nt_contractions <- c("couldn" = "could", "shouldn" = "should", "wouldn" = "would", "didn" = "did")
+  if(word %in% names(nt_contractions)) {
+    print("in nt contract")
+    word <- nt_contractions[word]
+    is_nt_contraction = 1
+  }
+  
   row <- as.integer(which(tibbletest[,1] == word))
   if(length(vals$substitutions) > 0 && word %in% vals$substitutions) {  # word has a special klattese input 
     index <- which(vals$substitutions == word)
@@ -71,7 +83,9 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
     }
   } else {  # word does not have special klattese input 
     if(length(row) > 0) {  # if word is in db 
-      this_word_info <- append(this_word_info, toString(tibbletest[row, 2]))  # second element is Klattese
+      klatt <- toString(tibbletest[row, 2])
+      if(is_nt_contraction) klatt <- paste(klatt, "N", sep="") # Replace the N in nt contractions 
+      this_word_info <- append(this_word_info, klatt)  # second element is Klattese
       this_word_info <- append(this_word_info, toString(tibbletest[row, 3]))  # third element is word frequency
       vals$words_in_db = vals$words_in_db + 1
     } else {  # word is not in db 
@@ -79,6 +93,7 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
       this_word_info <- append(this_word_info, NA)  # Zipf val is not found 
     }
   }
+  print(this_word_info)
   return(this_word_info)
 }
 
@@ -88,6 +103,7 @@ rescueContraction <- function(vals, this_word_info, index) {
   engl <- this_word_info[1]
   base <- this_word_info[2]  # base in klattese
   contraction <- vals$wbw_english[index+1]  # english orthography contraction
+  print(contraction)
   final_phoneme <- substr(base, str_length(base), str_length(base))  # last sound in base
   if(final_phoneme %in% engl_voiceless_cons) isVoiced <- 0
   # add the correct pronunciation of the contraction to the klattese, and format english 
@@ -98,10 +114,13 @@ rescueContraction <- function(vals, this_word_info, index) {
   } else if(contraction == "d") {
     engl <- paste(engl, "'d", sep="")
     if(!(is.na(base))) base <- paste(base, "d", sep="")
+  } else if(contraction == "t") {
+    engl <- paste(engl, "'t", sep="")
+    if(!(is.na(base))) base <- paste(base, "t", sep="")
   } else if(contraction == "ve") {
     engl <- paste(engl, "'ve", sep="")
     if(!(is.na(base))) base <- paste(base, "v", sep="")
-  }
+  } 
   else {  # contraction is "ll"
     engl <- paste(engl, "'ll", sep="")
     if(!(is.na(base))) base <- paste(base, "L", sep="")  
@@ -163,7 +182,7 @@ updateAverage <- function(vals) {
     Avg_WCM_Score=NA,
     Avg_Zipf_WF_Score=NA
   )
-  total_words_in_tscript <- vals$wbw_english[! vals$wbw_english %in% c("s", "d", "ve", "ll")]  # remove contracted bits
+  total_words_in_tscript <- vals$wbw_english[! vals$wbw_english %in% c("s", "d", "t", "ve", "ll")]  # remove contracted bits
   vals$avg_data[1,1] = toString(length(total_words_in_tscript))  # Total number of words in the input
   vals$avg_data[1,2] = toString(vals$words_in_db)  # Total number of words found in the database
   if(vals$words_in_db == 0) {  # if no data just display NA
