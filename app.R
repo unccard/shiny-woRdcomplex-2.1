@@ -63,6 +63,7 @@ server <- function(input, output) {
     vals$substitutions <- c()  # vector to store any special klattese inputs 
     vals$phon_total <- vals$wf_total <-  vals$is_contraction <- vals$words_in_db <- 0
     vals$has_data <- vals$wbw_row <- 1
+    vals$contractions <- c("s", "d", "t","ve", "ll")
     
     # process and clean the inputs
     sample <- gsub('[[:punct:] ]+',' ',tolower(input$sample))  # strip punctuation and use lowercase
@@ -85,7 +86,7 @@ server <- function(input, output) {
       }
       this_word_info <- retrieveDBInfo(vals, vals$wbw_english[word], tibbletest)
       if(word <= length(vals$wbw_english)-1) {  # if there is a next element 
-        if(vals$wbw_english[word+1] %in% c("s", "d", "t","ve", "ll")) {  # if the element is a contraction 
+        if(vals$wbw_english[word+1] %in% vals$contractions) {  # if the element is a contraction 
           vals$is_contraction = 1
           this_word_info <- rescueContraction(vals, this_word_info, word)
         }
