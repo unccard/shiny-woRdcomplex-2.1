@@ -46,7 +46,7 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
-  word_db <- read.csv('UNCWordDB-2021-10-08.csv', na.strings=c("", "NA"))
+  word_db <- read.csv('UNCWordDB-2022-02-07.csv', na.strings=c("", "NA"))
   tibbletest <- tibble(word_db$Word, word_db$KlatteseSyll, word_db$Zipf.value)
   
   # Stores all values that are changed during the program 
