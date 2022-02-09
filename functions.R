@@ -64,7 +64,7 @@ retrieveDBInfo <- function(vals, word, tibbletest) {
   print(word)
   
   # Look for and handle the special case contractions 
-  nt_contractions <- c("couldn" = "could", "shouldn" = "should", "wouldn" = "would", "didn" = "did")
+  nt_contractions <- c("couldn" = "could", "shouldn" = "should", "wouldn" = "would", "didn" = "did", "wasn" = "was")
   if(word %in% names(nt_contractions)) {
     print("in nt contract")
     word <- nt_contractions[word]
