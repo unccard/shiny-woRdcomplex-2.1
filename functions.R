@@ -112,8 +112,7 @@ rescueContraction <- function(vals, this_word_info, index, contraction) {
   word <- this_word_info[1]
   klatt <- this_word_info[2]  # base in klattese
   contraction <- vals$wbw_english[index+1]  # english orthography contraction
-  final_phoneme <- substr(klatt, str_length(klatt), str_length(klatt))  # last sound in base
-  if(final_phoneme %in% engl_voiceless_cons) isVoiced <- 0
+  if(final_phoneme(klatt) %in% engl_voiceless_cons) isVoiced <- 0
   # add the correct pronunciation of the contraction to the klattese, and format english 
   if(contraction == "s") {
     word <- paste(word, "'s", sep="")
