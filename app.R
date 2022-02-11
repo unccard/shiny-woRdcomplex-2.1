@@ -61,34 +61,39 @@ server <- function(input, output) {
     vals$wbw_english <- c()  # clear previous inputs before adding new 
     vals$all_word_info <- c()  # vector where we will track all info for all words
     vals$substitutions <- c()  # vector to store any special klattese inputs 
-    vals$phon_total <- vals$wf_total <-  vals$is_contraction <- vals$words_in_db <- 0
+    vals$phon_total <- vals$wf_total <-  vals$words_in_db <- vals$is_nt_contraction <- 0
     vals$has_data <- vals$wbw_row <- 1
-    vals$contractions <- c("s", "d", "t","ve", "ll")
+    contractions <- c("s","d","t","ve","re","ll")
     
     # process and clean the inputs
     sample <- gsub('[[:punct:] ]+',' ',tolower(input$sample))  # strip punctuation and use lowercase
     english <- strsplit(sample, "[ ?\r?\n]") # split reactive input on any space or newline
     sample_clean <- c()
-    for(word in 1:length(english[[1]])) {  # remove empty values from sample 
-      if(english[[1]][word] != "") sample_clean <- append(sample_clean, english[[1]][word])
+    for(index in 1:length(english[[1]])) {  # remove empty values from sample 
+      if(english[[1]][index] != "") sample_clean <- append(sample_clean, english[[1]][index])
     }
     vals$wbw_english <- sample_clean # store in reactive values 
     if(isTruthy(input$specifyKlattese)) {
       special_klattese <- strsplit(input$specifyKlattese, "[ ?\r?\n]")  # break up the special klattese inputs
       vals$substitutions <- processSpecialInput(vals, special_klattese)  # parse the english and klattese pairs
     }
-
     # loop through input to gather info on each word
-    for(word in 1:length(vals$wbw_english)) {  
-      if(vals$is_contraction == 1) {  # if this is a contracted bit 
-        vals$is_contraction = 0  # reset the flag 
-        next  # skip the contraction 
+    
+    for(index in 1:length(vals$wbw_english)) {  
+      if(vals$wbw_english[index] %in% contractions) {  # if this element is a contraction suffix
+        next  # skip the contraction suffix 
       }
-      this_word_info <- retrieveDBInfo(vals, vals$wbw_english[word], tibbletest)
-      if(word <= length(vals$wbw_english)-1) {  # if there is a next element 
-        if(vals$wbw_english[word+1] %in% vals$contractions) {  # if the element is a contraction 
-          vals$is_contraction = 1
-          this_word_info <- rescueContraction(vals, this_word_info, word)
+      
+      # Identify --n't contractions
+      word <- vals$wbw_english[index]
+      next_word <- vals$wbw_english[index+1]
+      if(final_phoneme(word) == "n" && next_word == "t") vals$is_nt_contraction = 1
+      
+      this_word_info <- retrieveDBInfo(vals, word, tibbletest)
+      
+      if(index <= length(vals$wbw_english)-1) {  # if there is a next element 
+        if(vals$wbw_english[index+1] %in% contractions) {  # if the next element is a contraction suffix
+          this_word_info <- rescueContraction(vals, this_word_info, index)
         }
       }
       vals$all_word_info <- append(vals$all_word_info, this_word_info)
