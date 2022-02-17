@@ -28,7 +28,8 @@ ui <- fluidPage(
                  <li>Use the English,Klattese input for pairs that may not be in the database or that you want to write a specific pronunciation for.</li>
                  <li>This app does not save data between calculations. Be sure to use the download buttons if you need to save your data.</li>
                  <li>Recommended to open downloaded files in a text editor other than Excel, which can't read the Klattese stress marker.</li>
-                 <li>For more information on WCM, Zipf Frequency, and our database, refer to our <a href=\"https://github.com/unccard\">GitHub</a>.</li>
+                 <li>For more information on WCM, Zipf Frequency, and our database, refer to our <a href=\"https://github.com/unccard/shiny-woRdcomplex-2.1">GitHub</a>.</li>
+                 <li> 
                </ul>"
              ))
   ),
