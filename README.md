@@ -10,6 +10,7 @@ An applied example of this work is found at the following link: https://go.unc.e
 Jacks, A., Richardson, J.D., Greene, L.G., & Haley, K.L. (2022, February). Phonetic word complexity in narratives produced by people with AOS of varying etiology. Poster presented at: 21st Biennial Conference on Motor Speech, 2022 February; Charleston, SC.
 
 References:
+
 Bartlett, S., Kondrak, G., & Cherry, C. (2009, June). On the syllabification of phonemes. In Proceedings of human language technologies: The 2009 annual conference of the north american chapter of the association for computational linguistics (pp. 308-316).
 
 Brysbaert, M., & New, B. (2009). Moving beyond Kučera and Francis: A critical evaluation of current word frequency norms and the introduction of a new and improved word frequency measure for American English. Behavior research methods, 41(4), 977-990.
