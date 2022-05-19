@@ -127,6 +127,9 @@ rescueContraction <- function(vals, this_word_info, index, contraction) {
   } else if(contraction == "ve") {
     word <- paste(word, "'ve", sep="")
     if(!(is.na(klatt))) klatt <- paste(klatt, "v", sep="")
+  } else if(contraction == "re") {
+    word <- paste(word, "'re", sep="")
+    if(!(is.na(klatt))) klatt <- paste(klatt, "R", sep="")
   } 
   else {  # contraction is "ll"
     word <- paste(word, "'ll", sep="")
