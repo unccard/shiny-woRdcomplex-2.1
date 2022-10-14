@@ -19,7 +19,7 @@ calculateWCM <- function(klattese) {
     phon_points=phon_points+1  # syllable structures (1)
   } 
   # if the word has consonant clusters 
-  split <- strsplit(klattese, "([iIEe@aWY^cOoUuRx|XLMNR\\ˈ]+|-+)+")  # regular expression to isolate consonants 
+  split <- strsplit(klattese, "([iIEe@aWY^cOoUuRx|XLMNRˌ\\ˈˌ]+|-+)+")  # regular expression to isolate consonants 
   for(i in 1:length(split[[1]])) {
     if(str_length(split[[1]][i]) > 1) { 
       phon_points = phon_points + 1  # syllable structures (2)
@@ -127,7 +127,8 @@ rescueContraction <- function(vals, this_word_info, index, contraction) {
   } else if(contraction == "ve") {
     word <- paste(word, "'ve", sep="")
     if(!(is.na(klatt))) klatt <- paste(klatt, "v", sep="")
-  } else if(contraction == "re") {
+  } 
+  else if(contraction == "re") {
     word <- paste(word, "'re", sep="")
     if(!(is.na(klatt))) klatt <- paste(klatt, "R", sep="")
   } 
