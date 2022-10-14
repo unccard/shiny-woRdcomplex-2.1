@@ -87,8 +87,11 @@ server <- function(input, output) {
       # Identify --n't contractions
       word <- vals$wbw_english[index]
       next_word <- vals$wbw_english[index+1]
-      if(final_phoneme(word) == "n" && next_word == "t") vals$is_nt_contraction = 1
       
+      # only check for nt contraction if the word with n as final phoneme is not the last in the list.
+      if(index < length(vals$wbw_english)) {
+        if(final_phoneme(word) == "n" && next_word == "t") vals$is_nt_contraction = 1
+      }
       this_word_info <- retrieveDBInfo(vals, word, tibbletest)
       
       if(index <= length(vals$wbw_english)-1) {  # if there is a next element 
