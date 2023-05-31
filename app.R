@@ -21,16 +21,16 @@ ui <- fluidPage(
     textAreaInput("specifyKlattese", "Enter alternate/not found in DB transcriptions:", value = "eldridge,EldrIJ\ntejada,tehadx", placeholder="Write comma-separated English,Klattese pairs, with a newline or space between pairs", height="100px"),
     actionButton("submit", "Calculate WCM"), 
     HTML("<hr>"),
-    fluidRow("Notes:", 
+    fluidRow("Usage Notes:", 
              HTML(
                "<ul>
                  <li>Your input may be separated by space or newline characters.</li>
                  <li>Use the English,Klattese input for pairs that may not be in the database or that you want to write a specific pronunciation for.</li>
                  <li>This app does not save data between calculations. Be sure to use the download buttons if you need to save your data.</li>
                  <li>Recommended to open downloaded files in a text editor other than Excel, which can't read the Klattese stress marker.</li>
-                 <li>For more information on WCM, Zipf Frequency, and our database, refer to our <a href=\"https://github.com/unccard/shiny-woRdcomplex-2.1\">Github</a>.</li>
-               </ul>"
-             ))
+                
+                </ul>"
+             )),     
   ),
   
   # Main panel with outputs
@@ -40,6 +40,27 @@ ui <- fluidPage(
     HTML("<hr>"),
     DT::dataTableOutput("average", "auto", "auto"),
     downloadButton("downloadAVG", "Download"),
+    
+    HTML("<hr>"),
+    fluidRow("About the App:", 
+             HTML(
+               "<ul>
+                 <li>Word Complexity Measure (WCM) is calculated as described in Stoel-Gammon (2010), based on lookup from a database including standard syllabified transcriptions for American English (cmudict.0.6d.syl; Bartlett et al., 2009) and word frequency measures from the SUBTLEX-US dictionary (Brysbaert & New, 2009). 
+                 <li>Word frequencies are displayed in Zipf units (van Heuven et al 2014), a logarithmic scale defined as log10(word frequency in words per billion), with distribution from approximately 1 (very low frequency) to 7 (high frequency function words, articles, etc.).
+                 <li>For more information on WCM, Zipf Frequency, and our database, refer to our <a href=\"https://github.com/unccard/shiny-woRdcomplex-2.1\">Github</a>.</li>
+               </ul>"
+             ),     
+             "References:", 
+             HTML(
+               "<ul>
+                 <li>Bartlett, S., Kondrak, G., & Cherry, C. (2009, June). On the syllabification of phonemes. In Proceedings of human language technologies: The 2009 annual conference of the north american chapter of the association for computational linguistics (pp. 308-316).</li>
+                 <li>Brysbaert, M., & New, B. (2009). Moving beyond Kučera and Francis: A critical evaluation of current word frequency norms and the introduction of a new and improved word frequency measure for American English. Behavior research methods, 41(4), 977-990.</li>
+                 <li>Stoel-Gammon, C. (2010). The Word Complexity Measure: Description and application to developmental phonology and disorders. Clinical linguistics & phonetics, 24(4-5), 271-282.</li>
+                 <li> Van Heuven, W. J., Mandera, P., Keuleers, E., & Brysbaert, M. (2014). SUBTLEX-UK: A new and improved word frequency database for British English. Quarterly journal of experimental psychology, 67(6), 1176-1190.</li>
+                </ul>"
+               
+             ))
+    
   ), 
   
   title = "Word Complexity Measure"
